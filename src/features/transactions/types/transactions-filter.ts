@@ -15,11 +15,15 @@ export type TransactionsFilterRequest = {
     ungrouped?: boolean,
     sortBy?: string,
     sortDirection?: string,
-    page?: number,
-    pageSize?: number,
+    page: number,
+    pageSize: number,
 }
 
 export type TransactionsFilterResponse = {
     transactions: TransactionResponse[],
+    totalCount: number,
+    pageSize: number,
+    currentPage: number,
+    totalPages: number
 }
 

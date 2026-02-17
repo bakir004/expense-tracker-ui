@@ -15,3 +15,11 @@ export type TransactionResponse = {
     updatedAt: Date
 }
 
+export type TransactionsWithPagingMetadata = {
+    transactions: TransactionPopulated[],
+    totalCount: number,
+    pageSize: number,
+    currentPage: number,
+    totalPages: number
+}
+

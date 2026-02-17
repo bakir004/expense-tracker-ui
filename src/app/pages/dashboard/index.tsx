@@ -8,11 +8,11 @@ export default function Dashboard() {
     return (
         <Group fullWidth gap={0} padding={0}>
             <Sidebar />
-            <Stack className="max-h-screen h-screen" fullWidth>
-                <ScrollArea>
+            <ScrollArea className="max-h-screen h-screen w-full">
+                <Stack className="h-full w-full max-w-[960px] mx-auto" fullWidth>
                     <Outlet />
-                </ScrollArea>
-            </Stack>
+                </Stack>
+            </ScrollArea>
         </Group>
     );
 }

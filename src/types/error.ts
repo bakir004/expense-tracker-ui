@@ -1,4 +1,4 @@
-export type TransactionsErrorResponse = {
+export type ErrorResponse = {
     type: string;
     title: string;
     status: number;

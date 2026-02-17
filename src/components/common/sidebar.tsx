@@ -48,7 +48,7 @@ export default function Sidebar() {
     ];
 
     return (
-        <Stack className="border-r w-64 justify-between">
+        <Stack className="w-64 bg-card justify-between">
             <Stack padding={0}>
                 <Typography variant="h2">Expense Tracker</Typography>
                 <Stack padding={0} gap={2}>
