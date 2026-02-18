@@ -6,7 +6,7 @@ import TransactionFilters from "./transaction-filters";
 import TransactionTable from "./transaction-table";
 import TransactionTableSkeleton from "./transaction-table-skeleton";
 
-const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 10;
 
 export default function TransactionFilterTable() {
     const [filters, setFilters] = useState<TransactionsFilterRequest>({
