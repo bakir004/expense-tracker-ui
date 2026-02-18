@@ -1,3 +1,5 @@
+import type { TransactionPopulated } from "@/types/transaction"
+
 export type TransactionResponse = {
     id: number,
     userId: number,

@@ -1,5 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { ArrowUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function TransactionsTableSkeleton({ count = 10 }: { count?: number }) {
     return (
@@ -7,12 +9,42 @@ export default function TransactionsTableSkeleton({ count = 10 }: { count?: numb
             <TableCaption>Loading data...</TableCaption>
             <TableHeader>
                 <TableRow>
-                    <TableHead className="w-3/12">Subject</TableHead>
-                    <TableHead className="w-2/12">Date</TableHead>
-                    <TableHead className="w-2/12">Category</TableHead>
-                    <TableHead className="w-1/12">Transaction group</TableHead>
-                    <TableHead className="w-1/12">Payment method</TableHead>
-                    <TableHead className="w-1/12 text-right">Amount</TableHead>
+                    <TableHead className="w-3/12">
+                        <Button variant="ghost">
+                            Subject
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
+                    <TableHead className="w-2/12">
+                        <Button variant="ghost">
+                            Date 
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
+                    <TableHead className="w-2/12">
+                        <Button variant="ghost">
+                            Category 
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
+                    <TableHead className="w-1/12">
+                        <Button variant="ghost">
+                            Transaction group 
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
+                    <TableHead className="w-1/12">
+                        <Button variant="ghost">
+                            Payment method 
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
+                    <TableHead className="w-1/12 text-right">
+                        <Button variant="ghost">
+                            Amount 
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>

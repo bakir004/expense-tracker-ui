@@ -3,12 +3,15 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { cn } from "@/lib/utils";
 import type { TransactionsWithPagingMetadata } from "../types/transaction-response";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 interface TransactionTableProps {
     data: TransactionsWithPagingMetadata;
+    sort: (field: string) => void;
 }
 
-export default function TransactionTable({ data }: TransactionTableProps) {
+export default function TransactionTable({ data, sort }: TransactionTableProps) {
     const sgn = (n: number) => n < 0 ? '-' : '+';
     const formatAmount = (amount: number) => `${sgn(amount)}$${Math.abs(amount)}`;
     const formatPaymentMethod = (method: string) => method.replace("_", " ").toLowerCase();;
@@ -18,14 +21,44 @@ export default function TransactionTable({ data }: TransactionTableProps) {
             <TableCaption>Showing {(data.currentPage-1) * data.pageSize+(data.transactions.length > 0 ? 1 : 0)}
                 -{(data.currentPage-1) * data.pageSize + data.transactions.length} of {data.totalCount} transactions
             </TableCaption>
-            <TableHeader>
+            <TableHeader className="bg-card">
                 <TableRow>
-                    <TableHead className="w-3/12">Subject</TableHead>
-                    <TableHead className="w-2/12">Date</TableHead>
-                    <TableHead className="w-2/12">Category</TableHead>
-                    <TableHead className="w-1/12">Transaction group</TableHead>
-                    <TableHead className="w-1/12">Payment method</TableHead>
-                    <TableHead className="w-1/12 text-right">Amount</TableHead>
+                    <TableHead className="w-3/12">
+                        <Button variant="ghost" onClick={() => sort('subject')}>
+                            Subject
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
+                    <TableHead className="w-2/12">
+                        <Button variant="ghost" onClick={() => sort('date')}>
+                            Date 
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
+                    <TableHead className="w-2/12">
+                        <Button variant="ghost" onClick={() => sort('categoryId')}>
+                            Category 
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
+                    <TableHead className="w-1/12">
+                        <Button variant="ghost" onClick={() => sort('transactionGroupId')}>
+                            Transaction group 
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
+                    <TableHead className="w-1/12">
+                        <Button variant="ghost" onClick={() => sort('paymentMethod')}>
+                            Payment method 
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
+                    <TableHead className="w-1/12 text-right">
+                        <Button variant="ghost" onClick={() => sort('amount')}>
+                            Amount 
+                            <ArrowUpDown className="h-2 w-2" />
+                        </Button>
+                    </TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
