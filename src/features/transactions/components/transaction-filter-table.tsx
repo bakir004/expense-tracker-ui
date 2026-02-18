@@ -1,4 +1,11 @@
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination";
 import { useState } from "react";
 import { useGetTransactions } from "../api/get-transactions";
 import type { TransactionsFilterRequest } from "../types/transactions-filter";
@@ -22,26 +29,32 @@ export default function TransactionFilterTable() {
 
     const skeletonCount = data?.transactions?.length || prevCount;
 
-    const prev = () => setFilters((prev) => ({ ...prev, page: Math.max(1, (prev.page || 1) - 1) }));
-    const next = () => setFilters((prev) => ({ ...prev, page: Math.min((prev.page || 1) + 1, data?.totalPages || 1) }));
+    const prev = () =>
+        setFilters((prev) => ({
+            ...prev,
+            page: Math.max(1, (prev.page || 1) - 1),
+        }));
+    const next = () =>
+        setFilters((prev) => ({
+            ...prev,
+            page: Math.min((prev.page || 1) + 1, data?.totalPages || 1),
+        }));
 
     const sort = (field: string) => {
         setFilters((prev) => {
             const isSameField = prev.sortBy === field;
-            const newSortDirection = isSameField && prev.sortDirection === 'asc' ? 'desc' : 'asc';
+            const newSortDirection =
+                isSameField && prev.sortDirection === "asc" ? "desc" : "asc";
             return { ...prev, sortBy: field, sortDirection: newSortDirection };
         });
-    }
+    };
 
     return (
         <>
             <TransactionFilters filters={filters} setFilters={setFilters} />
-            
+
             {data && !isLoading ? (
-                <TransactionTable 
-                    data={data}
-                    sort={sort}
-                />
+                <TransactionTable data={data} sort={sort} />
             ) : (
                 <TransactionTableSkeleton count={skeletonCount} />
             )}
@@ -51,36 +64,42 @@ export default function TransactionFilterTable() {
                     <PaginationItem className="cursor-pointer">
                         <PaginationPrevious onClick={prev} />
                     </PaginationItem>
-                    
+
                     {filters.page && filters.page < 2 && (
                         <PaginationItem>
                             <PaginationLink>&nbsp;</PaginationLink>
                         </PaginationItem>
                     )}
-                    
+
                     {filters.page && filters.page >= 2 && (
                         <PaginationItem className="cursor-pointer">
-                            <PaginationLink onClick={prev}>{filters.page - 1}</PaginationLink>
+                            <PaginationLink onClick={prev}>
+                                {filters.page - 1}
+                            </PaginationLink>
                         </PaginationItem>
                     )}
 
                     <PaginationItem className="cursor-pointer">
-                        <PaginationLink isActive={filters.page === data?.currentPage}>
+                        <PaginationLink
+                            isActive={filters.page === data?.currentPage}
+                        >
                             {filters.page}
                         </PaginationLink>
                     </PaginationItem>
 
-                    {filters.page <= (data?.totalPages ?? 0) - 1 && 
+                    {filters.page <= (data?.totalPages ?? 0) - 1 && (
                         <PaginationItem className="cursor-pointer">
-                            <PaginationLink onClick={next}>{filters.page + 1}</PaginationLink>
+                            <PaginationLink onClick={next}>
+                                {filters.page + 1}
+                            </PaginationLink>
                         </PaginationItem>
-                    }
+                    )}
 
-                    {filters.page > (data?.totalPages ?? 0) - 1 && 
+                    {filters.page > (data?.totalPages ?? 0) - 1 && (
                         <PaginationItem>
                             <PaginationLink>&nbsp;</PaginationLink>
                         </PaginationItem>
-                    }
+                    )}
 
                     <PaginationItem className="cursor-pointer">
                         <PaginationNext onClick={next} />

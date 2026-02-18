@@ -9,7 +9,7 @@ export default function Dashboard() {
         <Group fullWidth gap={0} padding={0}>
             <Sidebar />
             <ScrollArea className="max-h-screen h-screen w-full">
-                <Stack className="h-full w-full max-w-[960px] mx-auto" fullWidth>
+                <Stack className="h-full w-full max-w-240 mx-auto" fullWidth>
                     <Outlet />
                 </Stack>
             </ScrollArea>

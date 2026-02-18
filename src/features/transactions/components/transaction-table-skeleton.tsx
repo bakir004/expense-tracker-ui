@@ -1,9 +1,21 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+    Table,
+    TableCaption,
+    TableHeader,
+    TableRow,
+    TableHead,
+    TableBody,
+    TableCell,
+} from "@/components/ui/table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function TransactionsTableSkeleton({ count = 10 }: { count?: number }) {
+export default function TransactionsTableSkeleton({
+    count = 10,
+}: {
+    count?: number;
+}) {
     return (
         <Table>
             <TableCaption>Loading data...</TableCaption>
@@ -17,31 +29,31 @@ export default function TransactionsTableSkeleton({ count = 10 }: { count?: numb
                     </TableHead>
                     <TableHead className="w-2/12">
                         <Button variant="ghost">
-                            Date 
+                            Date
                             <ArrowUpDown className="h-2 w-2" />
                         </Button>
                     </TableHead>
                     <TableHead className="w-2/12">
                         <Button variant="ghost">
-                            Category 
+                            Category
                             <ArrowUpDown className="h-2 w-2" />
                         </Button>
                     </TableHead>
                     <TableHead className="w-1/12">
                         <Button variant="ghost">
-                            Transaction group 
+                            Transaction group
                             <ArrowUpDown className="h-2 w-2" />
                         </Button>
                     </TableHead>
                     <TableHead className="w-1/12">
                         <Button variant="ghost">
-                            Payment method 
+                            Payment method
                             <ArrowUpDown className="h-2 w-2" />
                         </Button>
                     </TableHead>
                     <TableHead className="w-1/12 text-right">
                         <Button variant="ghost">
-                            Amount 
+                            Amount
                             <ArrowUpDown className="h-2 w-2" />
                         </Button>
                     </TableHead>
@@ -73,5 +85,5 @@ export default function TransactionsTableSkeleton({ count = 10 }: { count?: numb
                 ))}
             </TableBody>
         </Table>
-    )
+    );
 }
