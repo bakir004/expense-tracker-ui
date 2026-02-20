@@ -54,11 +54,11 @@ export default function TransactionFilterTable() {
 	};
 
     useEffect(() => {
+        const toastId = "transaction-selection";
         if (selectedTransactionIds.length === 0) {
-            toast.dismiss("transaction-selection");
+            toast.dismiss(toastId);
             return;
         }
-        const toastId = "transaction-selection";
 
         toast.info(`Selected ${selectedTransactionIds.length} transaction${selectedTransactionIds.length > 1 ? "s" : ""}`, {
             id: toastId,
