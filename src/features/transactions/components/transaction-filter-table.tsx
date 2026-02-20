@@ -13,6 +13,7 @@ import TransactionFilters from "./transaction-filters";
 import TransactionTable from "./transaction-table";
 import TransactionTableSkeleton from "./transaction-table-skeleton";
 import { toast } from "sonner";
+import { useBatchDeleteTransactions } from "../api/delete-batch-transactions";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -25,6 +26,7 @@ export default function TransactionFilterTable() {
 	const [sortColumn, setSortColumn] = useState<string>("date");
 	const { data, isLoading } = useGetTransactions(filters);
 	const [selectedTransactionIds, setSelectedTransactionIds] = useState<number[]>([]);
+    const { mutate: batchDeleteTransactions } = useBatchDeleteTransactions(selectedTransactionIds);
 
 	if (data?.transactions?.length && data.transactions.length !== prevCount) {
 		setPrevCount(data.transactions.length);
@@ -63,12 +65,21 @@ export default function TransactionFilterTable() {
         toast.info(`Selected ${selectedTransactionIds.length} transaction${selectedTransactionIds.length > 1 ? "s" : ""}`, {
             id: toastId,
             duration: Infinity,
+            action: {
+                label: "Delete",
+                onClick: () => batchDeleteTransactions(selectedTransactionIds, {
+                    onSuccess: () => {
+                        setSelectedTransactionIds([])
+                        setFilters(prev => ({ ...prev, page: 1 }));
+                    }
+                })
+            },
             cancel: {
                 label: "Cancel",
                 onClick: () => setSelectedTransactionIds([])
             }
         });
-    }, [selectedTransactionIds])
+    }, [selectedTransactionIds, batchDeleteTransactions]);
 
 	return (
 		<>
