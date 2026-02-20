@@ -6,12 +6,13 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetTransactions } from "../api/get-transactions";
 import type { TransactionsFilterRequest } from "../types/transactions-filter";
 import TransactionFilters from "./transaction-filters";
 import TransactionTable from "./transaction-table";
 import TransactionTableSkeleton from "./transaction-table-skeleton";
+import { toast } from "sonner";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -21,7 +22,9 @@ export default function TransactionFilterTable() {
 		pageSize: DEFAULT_PAGE_SIZE,
 	});
 	const [prevCount, setPrevCount] = useState(DEFAULT_PAGE_SIZE);
+	const [sortColumn, setSortColumn] = useState<string>("date");
 	const { data, isLoading } = useGetTransactions(filters);
+	const [selectedTransactionIds, setSelectedTransactionIds] = useState<number[]>([]);
 
 	if (data?.transactions?.length && data.transactions.length !== prevCount) {
 		setPrevCount(data.transactions.length);
@@ -41,6 +44,7 @@ export default function TransactionFilterTable() {
 		}));
 
 	const sort = (field: string) => {
+		setSortColumn(field);
 		setFilters((prev) => {
 			const isSameField = prev.sortBy === field;
 			const newSortDirection =
@@ -49,12 +53,35 @@ export default function TransactionFilterTable() {
 		});
 	};
 
+    useEffect(() => {
+        if (selectedTransactionIds.length === 0) {
+            toast.dismiss("transaction-selection");
+            return;
+        }
+        const toastId = "transaction-selection";
+
+        toast.info(`Selected ${selectedTransactionIds.length} transaction${selectedTransactionIds.length > 1 ? "s" : ""}`, {
+            id: toastId,
+            duration: Infinity,
+            cancel: {
+                label: "Cancel",
+                onClick: () => setSelectedTransactionIds([])
+            }
+        });
+    }, [selectedTransactionIds])
+
 	return (
 		<>
 			<TransactionFilters filters={filters} setFilters={setFilters} />
 
 			{data && !isLoading ? (
-				<TransactionTable data={data} sort={sort} />
+				<TransactionTable
+                    selectedTransactionIds={selectedTransactionIds}
+                    setSelectedTransactionIds={setSelectedTransactionIds}
+					sortColumn={sortColumn}
+					data={data}
+					sort={sort}
+				/>
 			) : (
 				<TransactionTableSkeleton count={skeletonCount} />
 			)}

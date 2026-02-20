@@ -158,6 +158,15 @@ export default function TransactionFilters({
 		}));
 	};
 
+    const handlePageSizeChange = (value: string) => {
+        const pageSize = parseInt(value, 10);
+        setFilters((prev) => ({
+            ...prev,
+            page: 1,
+            pageSize,
+        }));
+    }
+
 	const clearFilters = () => {
 		setFilters(() => ({
 			page: 1,
@@ -370,6 +379,32 @@ export default function TransactionFilters({
 								</DropdownMenuCheckboxItem>
 							))}
 						</DropdownMenuGroup>
+					</DropdownMenuContent>
+				</DropdownMenu>
+
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button variant="outline">
+                            Page size: {filters.pageSize}
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent className="w-56">
+						<DropdownMenuLabel>Page size</DropdownMenuLabel>
+						<DropdownMenuSeparator />
+						<DropdownMenuRadioGroup
+							value={filters.pageSize.toString()}
+							onValueChange={handlePageSizeChange}
+						>
+							<DropdownMenuRadioItem value="10">
+							    10	
+							</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem value="20">
+							    20	
+							</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem value="50">
+							    50	
+							</DropdownMenuRadioItem>
+						</DropdownMenuRadioGroup>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</Group>
