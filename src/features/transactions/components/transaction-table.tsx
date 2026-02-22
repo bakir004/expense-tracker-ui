@@ -19,8 +19,8 @@ interface TransactionTableProps {
 	data: TransactionsWithPagingMetadata;
 	sort: (field: string) => void;
 	sortColumn?: string;
-    selectedTransactionIds: number[];
-    setSelectedTransactionIds: React.Dispatch<React.SetStateAction<number[]>>;
+	selectedTransactionIds: number[];
+	setSelectedTransactionIds: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
 const columns = [
@@ -36,8 +36,8 @@ export default function TransactionTable({
 	data,
 	sort,
 	sortColumn,
-    selectedTransactionIds = [],
-    setSelectedTransactionIds = () => {},
+	selectedTransactionIds = [],
+	setSelectedTransactionIds = () => {},
 }: TransactionTableProps) {
 	const sgn = (n: number) => (n < 0 ? "-" : "+");
 	const formatAmount = (amount: number) =>
@@ -45,23 +45,39 @@ export default function TransactionTable({
 	const formatPaymentMethod = (method: string) =>
 		method.replace("_", " ").toLowerCase();
 
-    const handleCheckboxCheck = (checked: string | boolean, transactionId: number) => {
-        setSelectedTransactionIds(prev => {
-            if (checked) return [...prev, transactionId];
-            else return prev.filter((id: number) => id !== transactionId);
-        })
-    }
-    const allSelectedForActivePage = data.transactions.every(t => selectedTransactionIds.find(id => id === t.id));
+	const handleCheckboxCheck = (
+		checked: string | boolean,
+		transactionId: number,
+	) => {
+		setSelectedTransactionIds((prev) => {
+			if (checked) return [...prev, transactionId];
+			else return prev.filter((id: number) => id !== transactionId);
+		});
+	};
+	const allSelectedForActivePage = data.transactions.every((t) =>
+		selectedTransactionIds.find((id) => id === t.id),
+	);
 
-    const toggleSelectingAllTransactionsOnActivePage = () => {
-        if (allSelectedForActivePage) setSelectedTransactionIds(prev => prev.filter((id: number) => !data.transactions.find(t => t.id === id)));
-        else setSelectedTransactionIds(prev => [...prev, ...data.transactions.filter(t => !prev.find((id: number) => id === t.id)).map(t => t.id)]);
-    }
+	const toggleSelectingAllTransactionsOnActivePage = () => {
+		if (allSelectedForActivePage)
+			setSelectedTransactionIds((prev) =>
+				prev.filter(
+					(id: number) => !data.transactions.find((t) => t.id === id),
+				),
+			);
+		else
+			setSelectedTransactionIds((prev) => [
+				...prev,
+				...data.transactions
+					.filter((t) => !prev.find((id: number) => id === t.id))
+					.map((t) => t.id),
+			]);
+	};
 
 	return (
-		<ScrollArea className="whitespace-nowrap">
+		<ScrollArea className="whitespace-nowrap w-0 min-w-full">
 			<Table>
-				<TableCaption>
+				<TableCaption className="mb-4">
 					Showing{" "}
 					{(data.currentPage - 1) * data.pageSize +
 						(data.transactions.length > 0 ? 1 : 0)}
@@ -73,8 +89,13 @@ export default function TransactionTable({
 				<TableHeader className="bg-card">
 					<TableRow>
 						<TableHead className="w-8">
-                            <Checkbox checked={allSelectedForActivePage} onCheckedChange={toggleSelectingAllTransactionsOnActivePage}/>
-                        </TableHead>
+							<Checkbox
+								checked={allSelectedForActivePage}
+								onCheckedChange={
+									toggleSelectingAllTransactionsOnActivePage
+								}
+							/>
+						</TableHead>
 						{columns.map((col) => (
 							<TableHead className={col.width} key={col.key}>
 								<Button
@@ -95,9 +116,28 @@ export default function TransactionTable({
 				</TableHeader>
 				<TableBody>
 					{data.transactions.map((transaction, i: number) => (
-						<TableRow key={i} className={cn("h-13", selectedTransactionIds.find(id => id === transaction.id) ? "bg-card" : "")}>
+						<TableRow
+							key={i}
+							className={cn(
+								"h-13",
+								selectedTransactionIds.find(
+									(id) => id === transaction.id,
+								)
+									? "bg-card"
+									: "",
+							)}
+						>
 							<TableCell>
-                                <Checkbox checked={!!selectedTransactionIds.find(id => id === transaction.id)} onCheckedChange={c => handleCheckboxCheck(c, transaction.id)} />
+								<Checkbox
+									checked={
+										!!selectedTransactionIds.find(
+											(id) => id === transaction.id,
+										)
+									}
+									onCheckedChange={(c) =>
+										handleCheckboxCheck(c, transaction.id)
+									}
+								/>
 							</TableCell>
 							<TableCell className="font-medium pl-4">
 								{transaction.subject}
