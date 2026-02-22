@@ -14,26 +14,14 @@ export type Transaction = {
     notes?: string,
     paymentMethod: PaymentMethod,
     cumulativeDelta: number,
-    categoryId?: number,
-    transactionGroupId?: number,
+    categoryId: number | null,
+    transactionGroupId: number | null,
     createdAt: Date,
     updatedAt: Date,
 }
 
-export type TransactionPopulated = {
-    id: number,
-    userId: number,
-    transactionType: TransactionType,
-    amount: number,
-    signedAmount: number,
-    date: Date,
-    subject: string,
-    notes?: string,
-    paymentMethod: PaymentMethod,
-    cumulativeDelta: number,
-    category?: Category,
-    transactionGroup?: TransactionGroup,
-    createdAt: Date,
-    updatedAt: Date,
-}
+export type TransactionPopulated = Omit<Transaction, 'categoryId' | 'transactionGroupId'> & {
+    category?: Category;
+    transactionGroup?: TransactionGroup;
+};
 

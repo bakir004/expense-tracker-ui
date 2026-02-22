@@ -4,11 +4,11 @@ import type { TransactionsFilterRequest, TransactionsFilterResponse } from "../t
 import { fromStringToEnum } from "@/utils/enum-string-mapper";
 import { TransactionType } from "@/types/transaction-type";
 import { PaymentMethod } from "@/types/payment-method";
-import type { TransactionResponse } from "../types/transaction-response";
 import type { TransactionsWithPagingMetadata } from "../types/transaction-response";
 import type { ErrorResponse } from "@/types/error";
 import { useGetCategories } from "@/features/categories/api/get-categories";
 import { useGetTransactionGroups } from "@/features/transaction-groups/api/get-transaction-groups";
+import type { Transaction } from "@/types/transaction";
 
 export const getTransactionsRequest = (filters: TransactionsFilterRequest): Promise<TransactionsFilterResponse> => {
     return apiClient<TransactionsFilterResponse>("/transactions/", {
@@ -24,7 +24,7 @@ export const useGetTransactions = (filters: TransactionsFilterRequest) => {
         queryKey: ["transactions", filters],
         queryFn: () => getTransactionsRequest(filters),
         select: (data) => {
-            const populatedTransactions = data?.transactions.map((transaction: TransactionResponse) => ({
+            const populatedTransactions = data?.transactions.map((transaction: Transaction) => ({
                 id: transaction.id,
                 userId: transaction.userId,
                 transactionType: fromStringToEnum(TransactionType, transaction.transactionType),

@@ -14,6 +14,7 @@ import TransactionTable from "./transaction-table";
 import TransactionTableSkeleton from "./transaction-table-skeleton";
 import { toast } from "sonner";
 import { useBatchDeleteTransactions } from "../api/delete-batch-transactions";
+import { useUpdateTransaction } from "../api/update-transaction";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -27,6 +28,7 @@ export default function TransactionFilterTable() {
 	const { data, isLoading } = useGetTransactions(filters);
 	const [selectedTransactionIds, setSelectedTransactionIds] = useState<number[]>([]);
     const { mutate: batchDeleteTransactions } = useBatchDeleteTransactions(selectedTransactionIds);
+    const { mutate: updateTransaction } = useUpdateTransaction();
 
 	if (data?.transactions?.length && data.transactions.length !== prevCount) {
 		setPrevCount(data.transactions.length);
@@ -92,6 +94,7 @@ export default function TransactionFilterTable() {
 					sortColumn={sortColumn}
 					data={data}
 					sort={sort}
+                    update={updateTransaction}
 				/>
 			) : (
 				<TransactionTableSkeleton count={skeletonCount} />

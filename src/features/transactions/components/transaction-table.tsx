@@ -1,19 +1,25 @@
 import { Typography } from "@/components/common/typography";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import type { ErrorResponse } from "@/types/error";
+import type { TransactionPopulated } from "@/types/transaction";
+import type { UseMutateFunction } from "@tanstack/react-query";
+import { ArrowUpDown, Pencil, Plus } from "lucide-react";
+import { useState } from "react";
+import { fromTransactionPopulatedToRequest, type UpdateTransactionRequest } from "../types/transaction-request";
 import type { TransactionsWithPagingMetadata } from "../types/transaction-response";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { DatePickerSimple } from "./date-picker";
 
 interface TransactionTableProps {
 	data: TransactionsWithPagingMetadata;
@@ -21,6 +27,7 @@ interface TransactionTableProps {
 	sortColumn?: string;
 	selectedTransactionIds: number[];
 	setSelectedTransactionIds: React.Dispatch<React.SetStateAction<number[]>>;
+    update: UseMutateFunction<TransactionPopulated, ErrorResponse, UpdateTransactionRequest, unknown>
 }
 
 const columns = [
@@ -38,12 +45,11 @@ export default function TransactionTable({
 	sortColumn,
 	selectedTransactionIds = [],
 	setSelectedTransactionIds = () => {},
+    update,
 }: TransactionTableProps) {
 	const sgn = (n: number) => (n < 0 ? "-" : "+");
-	const formatAmount = (amount: number) =>
-		`${sgn(amount)}$${Math.abs(amount)}`;
-	const formatPaymentMethod = (method: string) =>
-		method.replace("_", " ").toLowerCase();
+	const formatAmount = (amount: number) => `${sgn(amount)}$${Math.abs(amount)}`;
+	const formatPaymentMethod = (method: string) => method.replace("_", " ").toLowerCase();
 
 	const handleCheckboxCheck = (
 		checked: string | boolean,
@@ -74,6 +80,34 @@ export default function TransactionTable({
 			]);
 	};
 
+	const [editingSubjectTransactionId, setEditingSubjectTransactionId] = useState<number | null>(null);
+	const [editingNotesTransactionId, setEditingNotesTransactionId] = useState<number | null>(null);
+
+	const startEditingSubjectForTransaction = (transactionId: number) => {
+		setEditingSubjectTransactionId(transactionId);
+	};
+	const startEditingNotesForTransaction = (transactionId: number) => {
+		setEditingNotesTransactionId(transactionId);
+	};
+
+    const updateTransaction = (transaction: TransactionPopulated) => {
+        const updatedTransactionRequest = fromTransactionPopulatedToRequest(transaction);
+        update(updatedTransactionRequest);
+    }
+
+	const saveSubjectForTransaction = (transaction: TransactionPopulated, newSubject: string) => {
+		setEditingSubjectTransactionId(null);
+        if(newSubject === transaction.subject) return;
+        const updatedTransaction = { ...transaction, subject: newSubject };
+        updateTransaction(updatedTransaction);
+	};
+	const saveNotesForTransaction = (transaction: TransactionPopulated, newNotes: string) => {
+		setEditingNotesTransactionId(null);
+        if(newNotes === transaction.notes) return;
+        const updatedTransaction = { ...transaction, notes: newNotes};
+        updateTransaction(updatedTransaction);
+	};
+
 	return (
 		<ScrollArea className="whitespace-nowrap w-0 min-w-full">
 			<Table>
@@ -101,11 +135,7 @@ export default function TransactionTable({
 								<Button
 									variant="ghost"
 									onClick={() => sort(col.key)}
-									className={
-										sortColumn === col.key
-											? "text-primary"
-											: ""
-									}
+									className={ sortColumn === col.key ? "text-primary" : "" }
 								>
 									{col.label}
 									<ArrowUpDown className="h-2 w-2" />
@@ -119,37 +149,96 @@ export default function TransactionTable({
 						<TableRow
 							key={i}
 							className={cn(
-								"h-13",
-								selectedTransactionIds.find(
-									(id) => id === transaction.id,
-								)
-									? "bg-card"
-									: "",
+								"h-13 hover:bg-card/50",
+								selectedTransactionIds.find( (id) => id === transaction.id,) ? "bg-card" : "",
 							)}
 						>
 							<TableCell>
 								<Checkbox
-									checked={
-										!!selectedTransactionIds.find(
-											(id) => id === transaction.id,
-										)
-									}
-									onCheckedChange={(c) =>
-										handleCheckboxCheck(c, transaction.id)
-									}
+									checked={ !!selectedTransactionIds.find( (id) => id === transaction.id,) }
+									onCheckedChange={(c) => handleCheckboxCheck(c, transaction.id) }
 								/>
 							</TableCell>
-							<TableCell className="font-medium pl-4">
-								{transaction.subject}
-								<br />
-								<Typography className="text-muted-foreground font-light text-xs mt-0.5">
-									{transaction.notes}
-								</Typography>
-							</TableCell>
-							<TableCell>
-								{new Intl.DateTimeFormat("en-GB").format(
-									transaction.date,
+							<TableCell className="font-medium pl-4 group">
+								{editingSubjectTransactionId ===
+								transaction.id ? (
+									<input
+										autoFocus
+										defaultValue={transaction.subject}
+										onBlur={(e) =>
+											saveSubjectForTransaction(
+                                                transaction,
+												e.target.value.trim(),
+											)
+										}
+										onKeyDown={(e) => {
+											if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim() !== "")
+												saveSubjectForTransaction(transaction, (e.target as HTMLInputElement).value.trim());
+											else if (e.key === "Enter")
+												setEditingSubjectTransactionId(null);
+										}}
+										className="w-full p-0 bg-transparent border border-muted focus:outline-none focus:border-muted-foreground"
+									/>
+								) : (
+									<Typography
+										className="text-xs cursor-pointer"
+										onClick={() => startEditingSubjectForTransaction( transaction.id,) }
+									>
+										{transaction.subject}
+									</Typography>
 								)}
+								{editingNotesTransactionId ===
+								transaction.id ? (
+									<input
+										autoFocus
+										defaultValue={transaction.notes ?? ""}
+										onBlur={(e) =>
+											saveNotesForTransaction(
+                                                transaction,
+												e.target.value.trim(),
+											)
+										}
+										onKeyDown={(e) => {
+											if (e.key === "Enter")
+												saveNotesForTransaction(transaction, ( e.target as HTMLInputElement).value.trim());
+										}}
+										className="w-full p-0 bg-transparent border border-muted focus:outline-none focus:border-muted-foreground text-xs"
+									/>
+								) : transaction.notes ? (
+									<Typography
+										onClick={() => startEditingNotesForTransaction( transaction.id )}
+										className="text-muted-foreground hover:text-foreground cursor-pointer font-light text-xs"
+									>
+										{transaction.notes}
+									</Typography>
+								) : (
+									<Typography
+										onClick={() => startEditingNotesForTransaction( transaction.id )}
+										className="cursor-pointer opacity-0 -mt-4 group-hover:-mt-0 transition-[margin,opacity] hover:text-foreground group-hover:opacity-100 text-muted-foreground font-light text-xs"
+									>
+										Add a note{" "}
+										<Plus className="inline h-3 w-3" />
+									</Typography>
+								)}
+							</TableCell>
+							<TableCell className="group max-w-fit">
+                                <DatePickerSimple date={transaction.date} setDate={(date) => {
+                                    const updatedTransaction = { ...transaction, date };
+                                    updateTransaction(updatedTransaction);
+                                }}>
+                                    <Button 
+                                        variant="ghost"
+                                        id="date-picker-simple"
+                                        className="items-center hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
+                                    >
+                                        <Typography className="text-xs w-fit">
+                                            {new Intl.DateTimeFormat("en-GB").format(
+                                                transaction.date,
+                                            )}
+                                        </Typography>
+                                        <Pencil className="inline max-h-3 max-w-3 -mt-0.5 opacity-0 group-hover:opacity-100 transition" />
+                                    </Button>
+                                </DatePickerSimple>
 							</TableCell>
 							<TableCell>
 								{transaction.category

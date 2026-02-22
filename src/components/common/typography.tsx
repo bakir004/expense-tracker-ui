@@ -6,6 +6,7 @@ interface TypographyProps {
     children: ReactNode;
     className?: string;
     as?: ElementType;
+    onClick?: () => void;
 }
 
 const variants = {
@@ -22,11 +23,12 @@ export function Typography({
     children,
     className,
     as,
+    onClick,
 }: TypographyProps) {
     const Component = as || variant;
 
     return (
-        <Component className={cn(variants[variant], className)}>
+        <Component onClick={onClick} className={cn(variants[variant], className)}>
             {children}
         </Component>
     );

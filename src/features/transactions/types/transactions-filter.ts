@@ -1,4 +1,4 @@
-import type { TransactionResponse } from "./transaction-response"
+import type { Transaction } from "@/types/transaction"
 
 export type TransactionsFilterRequest = {
     transactionType?: string,
@@ -20,7 +20,7 @@ export type TransactionsFilterRequest = {
 }
 
 export type TransactionsFilterResponse = {
-    transactions: TransactionResponse[],
+    transactions: Transaction[],
     totalCount: number,
     pageSize: number,
     currentPage: number,
