@@ -36,18 +36,8 @@ import { useGetCategories } from "@/features/categories/api/get-categories";
 import { useGetTransactionGroups } from "@/features/transaction-groups/api/get-transaction-groups";
 import { Badge } from "@/components/ui/badge";
 import { PaymentMethod } from "@/types/payment-method";
-import {
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogDescription,
-	DialogTrigger,
-	Dialog,
-    DialogFooter,
-    DialogClose
-} from "@/components/ui/dialog";
-import { Field, FieldGroup } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import CreateTransactionGroupDialog from "@/features/transaction-groups/components/create-transaction-group-dialog";
+import EditAmountDialog from "./edit-amount-dialog";
 
 interface TransactionTableProps {
 	data: TransactionsWithPagingMetadata;
@@ -81,10 +71,9 @@ export default function TransactionTable({
 	update,
 }: TransactionTableProps) {
 	const sgn = (n: number) => (n < 0 ? "-" : "+");
-	const formatAmount = (amount: number) =>
-		`${sgn(amount)}$${Math.abs(amount)}`;
-	const formatPaymentMethod = (method: string) =>
-		method.replace("_", " ").toLowerCase();
+	const formatAmount = (amount: number) => `${sgn(amount)}$${Math.abs(amount)}`;
+	const formatPaymentMethod = (method: string) => method.replace("_", " ").toLowerCase();
+    const formatDate = (date: Date) => new Intl.DateTimeFormat("en-GB").format(date);
 	const { data: categories } = useGetCategories();
 	const { data: transactionGroups } = useGetTransactionGroups();
 
@@ -150,8 +139,9 @@ export default function TransactionTable({
 		newNotes: string,
 	) => {
 		setEditingNotesTransactionId(null);
-		if (newNotes === transaction.notes) return;
-		const updatedTransaction = { ...transaction, notes: newNotes };
+        if(!transaction.notes && newNotes.trim() === "") return;
+		if(newNotes.trim() === transaction.notes?.trim()) return;
+		const updatedTransaction = { ...transaction, notes: newNotes.trim() };
 		updateTransaction(updatedTransaction);
 	};
 
@@ -176,7 +166,7 @@ export default function TransactionTable({
 	) => {
 		const updatedTransactionGroup = {
 			...transaction.transactionGroup,
-			id: parseInt(transactionGroupId),
+			id: parseInt(transactionGroupId) ?? null,
 		} as TransactionPopulated["transactionGroup"];
 		const updatedTransaction = {
 			...transaction,
@@ -196,10 +186,6 @@ export default function TransactionTable({
 		};
 		updateTransaction(updatedTransaction);
 	};
-
-	const openAddTransactionGroupDialog = (
-		transaction: TransactionPopulated,
-	) => {};
 
 	return (
 		<ScrollArea className="whitespace-nowrap w-0 min-w-full">
@@ -374,9 +360,7 @@ export default function TransactionTable({
 										className="items-center hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
 									>
 										<Typography className="text-xs w-fit">
-											{new Intl.DateTimeFormat(
-												"en-GB",
-											).format(transaction.date)}
+                                            {formatDate(transaction.date)}
 										</Typography>
 										<Pencil className="inline max-h-3 max-w-3 -mt-0.5 opacity-0 group-hover:opacity-100 transition" />
 									</Button>
@@ -387,7 +371,6 @@ export default function TransactionTable({
 									<DropdownMenuTrigger asChild>
 										<Button
 											variant="ghost"
-											id="date-picker-simple"
 											className="items-center hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
 										>
 											<Typography className="text-xs w-fit">
@@ -415,6 +398,12 @@ export default function TransactionTable({
 													undefined
 												}
 											>
+                                                <DropdownMenuRadioItem
+                                                    value=""
+                                                    className="py-1 italic"
+                                                >
+                                                    None
+                                                </DropdownMenuRadioItem>
 												{categories?.map(
 													(category, i) => (
 														<DropdownMenuRadioItem
@@ -451,7 +440,7 @@ export default function TransactionTable({
 									<DropdownMenuContent className="w-fit">
 										<DropdownMenuGroup>
 											<DropdownMenuLabel className="py-1">
-												Transaction group
+												Transaction groups
 											</DropdownMenuLabel>
 											<DropdownMenuRadioGroup
 												className="max-h-64 overflow-y-auto scrollbar-thin"
@@ -466,6 +455,16 @@ export default function TransactionTable({
 													undefined
 												}
 											>
+                                                <CreateTransactionGroupDialog>
+                                                    <Plus className="inline h-4 w-4" />
+                                                    New group
+                                                </CreateTransactionGroupDialog>
+                                                <DropdownMenuRadioItem
+                                                    value=""
+                                                    className="py-1 italic"
+                                                >
+                                                    None
+                                                </DropdownMenuRadioItem>
 												{transactionGroups?.map(
 													(transactionGroup, i) => (
 														<DropdownMenuRadioItem
@@ -477,41 +476,6 @@ export default function TransactionTable({
 														</DropdownMenuRadioItem>
 													),
 												)}
-												<Dialog>
-													<DialogTrigger className="text-xs text-primary w-full flex gap-1 items-center py-1 px-2 hover:bg-muted cursor-pointer">
-														<Plus className="inline h-3 w-3" />
-														New group
-													</DialogTrigger>
-													<DialogContent>
-														<DialogHeader>
-															<DialogTitle className="text-lg">
-																Create a new transaction group
-															</DialogTitle>
-															<FieldGroup>
-																<Field>
-																	<Input
-																		id="name-1"
-																		name="name"
-                                                                        placeholder="E.g. Grocery shopping"
-																	/>
-																</Field>
-															</FieldGroup>
-															<DialogDescription>
-                                                                After creating the transaction group, you can select it from the dropdown menu.
-															</DialogDescription>
-                                                            <DialogFooter>
-                                                                <DialogClose asChild>
-                                                                    <Button variant="outline">
-                                                                        Cancel
-                                                                    </Button>
-                                                                </DialogClose>
-                                                                <Button type="submit">
-                                                                    Create
-                                                                </Button>
-                                                            </DialogFooter>
-														</DialogHeader>
-													</DialogContent>
-												</Dialog>
 											</DropdownMenuRadioGroup>
 										</DropdownMenuGroup>
 									</DropdownMenuContent>
@@ -522,7 +486,6 @@ export default function TransactionTable({
 									<DropdownMenuTrigger asChild>
 										<Button
 											variant="ghost"
-											id="date-picker-simple"
 											className="items-center capitalize hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
 										>
 											<Typography className="text-xs w-fit">
@@ -574,7 +537,16 @@ export default function TransactionTable({
 										: "text-primary",
 								)}
 							>
-								{formatAmount(transaction.signedAmount)}
+                                <EditAmountDialog
+                                    transaction={transaction}
+                                    updateTransaction={updateTransaction}
+                                >
+                                    <div className="items-center capitalize hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition">
+                                        <Typography className={cn("text-xs", transaction.signedAmount < 0 ? "text-destructive" : "text-primary")}>
+                                            {formatAmount(transaction.signedAmount)}
+                                        </Typography>
+                                    </div>
+                                </EditAmountDialog>
 							</TableCell>
 						</TableRow>
 					))}
