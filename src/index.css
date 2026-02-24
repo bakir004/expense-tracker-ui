@@ -21,6 +21,24 @@ h3 {
     font-family: "NType82-Regular", serif;
 }
 
+/* Custom Thin Scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px; /* This makes it thin */
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: oklch(from var(--muted) calc(l + 0.1) c h); /* Tailwind gray-300 */
+  border-radius: 20px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: oklch(from var(--muted) calc(l + 0.2) c h); /* Tailwind gray-400 */
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

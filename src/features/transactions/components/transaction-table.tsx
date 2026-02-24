@@ -3,13 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+	Table,
+	TableBody,
+	TableCaption,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import type { ErrorResponse } from "@/types/error";
@@ -17,9 +17,26 @@ import type { TransactionPopulated } from "@/types/transaction";
 import type { UseMutateFunction } from "@tanstack/react-query";
 import { ArrowUpDown, Pencil, Plus } from "lucide-react";
 import { useState } from "react";
-import { fromTransactionPopulatedToRequest, type UpdateTransactionRequest } from "../types/transaction-request";
+import {
+	fromTransactionPopulatedToRequest,
+	type UpdateTransactionRequest,
+} from "../types/transaction-request";
 import type { TransactionsWithPagingMetadata } from "../types/transaction-response";
 import { DatePickerSimple } from "./date-picker";
+import {
+	DropdownMenuTrigger,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuLabel,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu";
+import { useGetCategories } from "@/features/categories/api/get-categories";
+import { useGetTransactionGroups } from "@/features/transaction-groups/api/get-transaction-groups";
+import { Badge } from "@/components/ui/badge";
+import { PaymentMethod } from "@/types/payment-method";
+import { fromStringToEnum } from "@/utils/enum-string-mapper";
 
 interface TransactionTableProps {
 	data: TransactionsWithPagingMetadata;
@@ -27,7 +44,12 @@ interface TransactionTableProps {
 	sortColumn?: string;
 	selectedTransactionIds: number[];
 	setSelectedTransactionIds: React.Dispatch<React.SetStateAction<number[]>>;
-    update: UseMutateFunction<TransactionPopulated, ErrorResponse, UpdateTransactionRequest, unknown>
+	update: UseMutateFunction<
+		TransactionPopulated,
+		ErrorResponse,
+		UpdateTransactionRequest,
+		unknown
+	>;
 }
 
 const columns = [
@@ -45,11 +67,15 @@ export default function TransactionTable({
 	sortColumn,
 	selectedTransactionIds = [],
 	setSelectedTransactionIds = () => {},
-    update,
+	update,
 }: TransactionTableProps) {
 	const sgn = (n: number) => (n < 0 ? "-" : "+");
-	const formatAmount = (amount: number) => `${sgn(amount)}$${Math.abs(amount)}`;
-	const formatPaymentMethod = (method: string) => method.replace("_", " ").toLowerCase();
+	const formatAmount = (amount: number) =>
+		`${sgn(amount)}$${Math.abs(amount)}`;
+	const formatPaymentMethod = (method: string) =>
+		method.replace("_", " ").toLowerCase();
+	const { data: categories } = useGetCategories();
+	const { data: transactionGroups } = useGetTransactionGroups();
 
 	const handleCheckboxCheck = (
 		checked: string | boolean,
@@ -80,8 +106,11 @@ export default function TransactionTable({
 			]);
 	};
 
-	const [editingSubjectTransactionId, setEditingSubjectTransactionId] = useState<number | null>(null);
-	const [editingNotesTransactionId, setEditingNotesTransactionId] = useState<number | null>(null);
+	const [editingSubjectTransactionId, setEditingSubjectTransactionId] =
+		useState<number | null>(null);
+	const [editingNotesTransactionId, setEditingNotesTransactionId] = useState<
+		number | null
+	>(null);
 
 	const startEditingSubjectForTransaction = (transactionId: number) => {
 		setEditingSubjectTransactionId(transactionId);
@@ -90,23 +119,53 @@ export default function TransactionTable({
 		setEditingNotesTransactionId(transactionId);
 	};
 
-    const updateTransaction = (transaction: TransactionPopulated) => {
-        const updatedTransactionRequest = fromTransactionPopulatedToRequest(transaction);
-        update(updatedTransactionRequest);
-    }
+	const updateTransaction = (transaction: TransactionPopulated) => {
+		const updatedTransactionRequest =
+			fromTransactionPopulatedToRequest(transaction);
+		update(updatedTransactionRequest);
+	};
 
-	const saveSubjectForTransaction = (transaction: TransactionPopulated, newSubject: string) => {
+	const saveSubjectForTransaction = (
+		transaction: TransactionPopulated,
+		newSubject: string,
+	) => {
 		setEditingSubjectTransactionId(null);
-        if(newSubject === transaction.subject) return;
-        const updatedTransaction = { ...transaction, subject: newSubject };
-        updateTransaction(updatedTransaction);
+		if (newSubject === transaction.subject) return;
+		const updatedTransaction = { ...transaction, subject: newSubject };
+		updateTransaction(updatedTransaction);
 	};
-	const saveNotesForTransaction = (transaction: TransactionPopulated, newNotes: string) => {
+	const saveNotesForTransaction = (
+		transaction: TransactionPopulated,
+		newNotes: string,
+	) => {
 		setEditingNotesTransactionId(null);
-        if(newNotes === transaction.notes) return;
-        const updatedTransaction = { ...transaction, notes: newNotes};
-        updateTransaction(updatedTransaction);
+		if (newNotes === transaction.notes) return;
+		const updatedTransaction = { ...transaction, notes: newNotes };
+		updateTransaction(updatedTransaction);
 	};
+
+	const handleCategoryChange = (
+		transaction: TransactionPopulated,
+		categoryId: string,
+	) => {
+        const updatedCategory = { ...transaction.category, id: parseInt(categoryId) } as TransactionPopulated["category"];
+		const updatedTransaction = { ...transaction, category: updatedCategory };
+		updateTransaction(updatedTransaction);
+	};
+
+	const handleTransactionGroupChange = (
+		transaction: TransactionPopulated,
+		transactionGroupId: string,
+	) => {
+        const updatedTransactionGroup = { ...transaction.transactionGroup, id: parseInt(transactionGroupId) } as TransactionPopulated["transactionGroup"];
+		const updatedTransaction = { ...transaction, transactionGroup: updatedTransactionGroup };
+		updateTransaction(updatedTransaction);
+	};
+
+    const handlePaymentMethodChange = (transaction: TransactionPopulated, paymentMethod: string) => {
+        const updatedTransaction = { ...transaction, paymentMethod: paymentMethod as TransactionPopulated["paymentMethod"] };
+        updateTransaction(updatedTransaction);
+    }
 
 	return (
 		<ScrollArea className="whitespace-nowrap w-0 min-w-full">
@@ -135,7 +194,11 @@ export default function TransactionTable({
 								<Button
 									variant="ghost"
 									onClick={() => sort(col.key)}
-									className={ sortColumn === col.key ? "text-primary" : "" }
+									className={
+										sortColumn === col.key
+											? "text-primary"
+											: ""
+									}
 								>
 									{col.label}
 									<ArrowUpDown className="h-2 w-2" />
@@ -150,13 +213,23 @@ export default function TransactionTable({
 							key={i}
 							className={cn(
 								"h-13 hover:bg-card/50",
-								selectedTransactionIds.find( (id) => id === transaction.id,) ? "bg-card" : "",
+								selectedTransactionIds.find(
+									(id) => id === transaction.id,
+								)
+									? "bg-card"
+									: "",
 							)}
 						>
 							<TableCell>
 								<Checkbox
-									checked={ !!selectedTransactionIds.find( (id) => id === transaction.id,) }
-									onCheckedChange={(c) => handleCheckboxCheck(c, transaction.id) }
+									checked={
+										!!selectedTransactionIds.find(
+											(id) => id === transaction.id,
+										)
+									}
+									onCheckedChange={(c) =>
+										handleCheckboxCheck(c, transaction.id)
+									}
 								/>
 							</TableCell>
 							<TableCell className="font-medium pl-4 group">
@@ -167,22 +240,38 @@ export default function TransactionTable({
 										defaultValue={transaction.subject}
 										onBlur={(e) =>
 											saveSubjectForTransaction(
-                                                transaction,
+												transaction,
 												e.target.value.trim(),
 											)
 										}
 										onKeyDown={(e) => {
-											if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim() !== "")
-												saveSubjectForTransaction(transaction, (e.target as HTMLInputElement).value.trim());
+											if (
+												e.key === "Enter" &&
+												(
+													e.target as HTMLInputElement
+												).value.trim() !== ""
+											)
+												saveSubjectForTransaction(
+													transaction,
+													(
+														e.target as HTMLInputElement
+													).value.trim(),
+												);
 											else if (e.key === "Enter")
-												setEditingSubjectTransactionId(null);
+												setEditingSubjectTransactionId(
+													null,
+												);
 										}}
 										className="w-full p-0 bg-transparent border border-muted focus:outline-none focus:border-muted-foreground"
 									/>
 								) : (
 									<Typography
 										className="text-xs cursor-pointer"
-										onClick={() => startEditingSubjectForTransaction( transaction.id,) }
+										onClick={() =>
+											startEditingSubjectForTransaction(
+												transaction.id,
+											)
+										}
 									>
 										{transaction.subject}
 									</Typography>
@@ -194,26 +283,39 @@ export default function TransactionTable({
 										defaultValue={transaction.notes ?? ""}
 										onBlur={(e) =>
 											saveNotesForTransaction(
-                                                transaction,
+												transaction,
 												e.target.value.trim(),
 											)
 										}
 										onKeyDown={(e) => {
 											if (e.key === "Enter")
-												saveNotesForTransaction(transaction, ( e.target as HTMLInputElement).value.trim());
+												saveNotesForTransaction(
+													transaction,
+													(
+														e.target as HTMLInputElement
+													).value.trim(),
+												);
 										}}
 										className="w-full p-0 bg-transparent border border-muted focus:outline-none focus:border-muted-foreground text-xs"
 									/>
 								) : transaction.notes ? (
 									<Typography
-										onClick={() => startEditingNotesForTransaction( transaction.id )}
+										onClick={() =>
+											startEditingNotesForTransaction(
+												transaction.id,
+											)
+										}
 										className="text-muted-foreground hover:text-foreground cursor-pointer font-light text-xs"
 									>
 										{transaction.notes}
 									</Typography>
 								) : (
 									<Typography
-										onClick={() => startEditingNotesForTransaction( transaction.id )}
+										onClick={() =>
+											startEditingNotesForTransaction(
+												transaction.id,
+											)
+										}
 										className="cursor-pointer opacity-0 -mt-4 group-hover:-mt-0 transition-[margin,opacity] hover:text-foreground group-hover:opacity-100 text-muted-foreground font-light text-xs"
 									>
 										Add a note{" "}
@@ -222,34 +324,142 @@ export default function TransactionTable({
 								)}
 							</TableCell>
 							<TableCell className="group max-w-fit">
-                                <DatePickerSimple date={transaction.date} setDate={(date) => {
-                                    const updatedTransaction = { ...transaction, date };
-                                    updateTransaction(updatedTransaction);
-                                }}>
-                                    <Button 
-                                        variant="ghost"
-                                        id="date-picker-simple"
-                                        className="items-center hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
-                                    >
-                                        <Typography className="text-xs w-fit">
-                                            {new Intl.DateTimeFormat("en-GB").format(
-                                                transaction.date,
-                                            )}
-                                        </Typography>
-                                        <Pencil className="inline max-h-3 max-w-3 -mt-0.5 opacity-0 group-hover:opacity-100 transition" />
-                                    </Button>
-                                </DatePickerSimple>
+								<DatePickerSimple
+									date={transaction.date}
+									setDate={(date) => {
+										const updatedTransaction = {
+											...transaction,
+											date,
+										};
+										updateTransaction(updatedTransaction);
+									}}
+								>
+									<Button
+										variant="ghost"
+										id="date-picker-simple"
+										className="items-center hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
+									>
+										<Typography className="text-xs w-fit">
+											{new Intl.DateTimeFormat(
+												"en-GB",
+											).format(transaction.date)}
+										</Typography>
+										<Pencil className="inline max-h-3 max-w-3 -mt-0.5 opacity-0 group-hover:opacity-100 transition" />
+									</Button>
+								</DatePickerSimple>
 							</TableCell>
 							<TableCell>
-								{transaction.category
-									? `${transaction.category.icon} ${transaction.category.name}`
-									: "-"}
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button
+											variant="ghost"
+											id="date-picker-simple"
+											className="items-center hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
+										>
+											<Typography className="text-xs w-fit">
+												{transaction.category
+													? `${transaction.category?.icon} ${transaction.category?.name}`
+													: "None"}
+											</Typography>
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent className="w-fit">
+										<DropdownMenuGroup>
+											<DropdownMenuLabel className="py-1">
+												Category
+											</DropdownMenuLabel>
+											<DropdownMenuRadioGroup
+                                                className="max-h-64 overflow-y-scroll scrollbar-thin"
+												onValueChange={(value) => handleCategoryChange(transaction, value) }
+												value={ transaction.category?.id.toString() ?? undefined }
+											>
+												{categories?.map(
+													(category, i) => (
+														<DropdownMenuRadioItem
+															key={i}
+															value={category.id.toString()}
+                                                            className="py-1"
+														>
+															{`${category?.icon} ${category?.name}`}
+														</DropdownMenuRadioItem>
+													),
+												)}
+											</DropdownMenuRadioGroup>
+										</DropdownMenuGroup>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</TableCell>
 							<TableCell>
-								{transaction.transactionGroup?.name ?? "-"}
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+                                        <Badge variant={transaction.transactionGroup ? "secondary" : "ghost"} className="rounded-full cursor-pointer">
+                                            {transaction.transactionGroup ? transaction.transactionGroup.name : "None"}
+                                        </Badge>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent className="w-fit">
+										<DropdownMenuGroup>
+											<DropdownMenuLabel className="py-1">
+												Transaction group
+											</DropdownMenuLabel>
+											<DropdownMenuRadioGroup
+                                                className="max-h-64 overflow-y-scroll scrollbar-thin"
+												onValueChange={(value) => handleTransactionGroupChange(transaction, value) }
+												value={ transaction.transactionGroup?.id.toString() ?? undefined }
+											>
+												{transactionGroups?.map(
+													(transactionGroup, i) => (
+														<DropdownMenuRadioItem
+															key={i}
+															value={transactionGroup.id.toString()}
+                                                            className="py-1"
+														>
+                                                            {transactionGroup.name}
+														</DropdownMenuRadioItem>
+													),
+												)}
+											</DropdownMenuRadioGroup>
+										</DropdownMenuGroup>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</TableCell>
-							<TableCell className="capitalize">
-								{formatPaymentMethod(transaction.paymentMethod)}
+							<TableCell>
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button
+											variant="ghost"
+											id="date-picker-simple"
+											className="items-center capitalize hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
+										>
+											<Typography className="text-xs w-fit">
+                                                {formatPaymentMethod(transaction.paymentMethod)}
+											</Typography>
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent className="w-fit">
+										<DropdownMenuGroup>
+											<DropdownMenuLabel className="py-1">
+												Payment method
+											</DropdownMenuLabel>
+											<DropdownMenuRadioGroup
+                                                className="max-h-64 overflow-y-scroll scrollbar-thin"
+												onValueChange={(value) => handlePaymentMethodChange(transaction, value) }
+												value={transaction.paymentMethod}
+											>
+												{Object.values(PaymentMethod).map(
+													(method, i) => (
+														<DropdownMenuRadioItem
+															key={i}
+															value={method}
+                                                            className="py-1 capitalize"
+														>
+                                                            {formatPaymentMethod(method)}
+														</DropdownMenuRadioItem>
+													),
+												)}
+											</DropdownMenuRadioGroup>
+										</DropdownMenuGroup>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</TableCell>
 							<TableCell
 								className={cn(
