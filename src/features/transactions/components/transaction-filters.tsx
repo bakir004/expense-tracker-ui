@@ -175,6 +175,8 @@ export default function TransactionFilters({
 		setSubjectSearch("");
 		setSliderValues([SLIDER_MIN_VALUE + 1, SLIDER_MAX_VALUE - 1]);
 		setSelectedCategoryIds([]);
+        setSelectedTransactionGroupIds([]);
+        setSelectedPaymentMethods([]);
 	};
 
 	return (

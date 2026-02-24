@@ -36,7 +36,18 @@ import { useGetCategories } from "@/features/categories/api/get-categories";
 import { useGetTransactionGroups } from "@/features/transaction-groups/api/get-transaction-groups";
 import { Badge } from "@/components/ui/badge";
 import { PaymentMethod } from "@/types/payment-method";
-import { fromStringToEnum } from "@/utils/enum-string-mapper";
+import {
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+	DialogTrigger,
+	Dialog,
+    DialogFooter,
+    DialogClose
+} from "@/components/ui/dialog";
+import { Field, FieldGroup } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 interface TransactionTableProps {
 	data: TransactionsWithPagingMetadata;
@@ -148,8 +159,14 @@ export default function TransactionTable({
 		transaction: TransactionPopulated,
 		categoryId: string,
 	) => {
-        const updatedCategory = { ...transaction.category, id: parseInt(categoryId) } as TransactionPopulated["category"];
-		const updatedTransaction = { ...transaction, category: updatedCategory };
+		const updatedCategory = {
+			...transaction.category,
+			id: parseInt(categoryId),
+		} as TransactionPopulated["category"];
+		const updatedTransaction = {
+			...transaction,
+			category: updatedCategory,
+		};
 		updateTransaction(updatedTransaction);
 	};
 
@@ -157,15 +174,32 @@ export default function TransactionTable({
 		transaction: TransactionPopulated,
 		transactionGroupId: string,
 	) => {
-        const updatedTransactionGroup = { ...transaction.transactionGroup, id: parseInt(transactionGroupId) } as TransactionPopulated["transactionGroup"];
-		const updatedTransaction = { ...transaction, transactionGroup: updatedTransactionGroup };
+		const updatedTransactionGroup = {
+			...transaction.transactionGroup,
+			id: parseInt(transactionGroupId),
+		} as TransactionPopulated["transactionGroup"];
+		const updatedTransaction = {
+			...transaction,
+			transactionGroup: updatedTransactionGroup,
+		};
 		updateTransaction(updatedTransaction);
 	};
 
-    const handlePaymentMethodChange = (transaction: TransactionPopulated, paymentMethod: string) => {
-        const updatedTransaction = { ...transaction, paymentMethod: paymentMethod as TransactionPopulated["paymentMethod"] };
-        updateTransaction(updatedTransaction);
-    }
+	const handlePaymentMethodChange = (
+		transaction: TransactionPopulated,
+		paymentMethod: string,
+	) => {
+		const updatedTransaction = {
+			...transaction,
+			paymentMethod:
+				paymentMethod as TransactionPopulated["paymentMethod"],
+		};
+		updateTransaction(updatedTransaction);
+	};
+
+	const openAddTransactionGroupDialog = (
+		transaction: TransactionPopulated,
+	) => {};
 
 	return (
 		<ScrollArea className="whitespace-nowrap w-0 min-w-full">
@@ -369,16 +403,24 @@ export default function TransactionTable({
 												Category
 											</DropdownMenuLabel>
 											<DropdownMenuRadioGroup
-                                                className="max-h-64 overflow-y-scroll scrollbar-thin"
-												onValueChange={(value) => handleCategoryChange(transaction, value) }
-												value={ transaction.category?.id.toString() ?? undefined }
+												className="max-h-64 overflow-y-scroll scrollbar-thin"
+												onValueChange={(value) =>
+													handleCategoryChange(
+														transaction,
+														value,
+													)
+												}
+												value={
+													transaction.category?.id.toString() ??
+													undefined
+												}
 											>
 												{categories?.map(
 													(category, i) => (
 														<DropdownMenuRadioItem
 															key={i}
 															value={category.id.toString()}
-                                                            className="py-1"
+															className="py-1"
 														>
 															{`${category?.icon} ${category?.name}`}
 														</DropdownMenuRadioItem>
@@ -392,9 +434,19 @@ export default function TransactionTable({
 							<TableCell>
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
-                                        <Badge variant={transaction.transactionGroup ? "secondary" : "ghost"} className="rounded-full cursor-pointer">
-                                            {transaction.transactionGroup ? transaction.transactionGroup.name : "None"}
-                                        </Badge>
+										<Badge
+											variant={
+												transaction.transactionGroup
+													? "secondary"
+													: "ghost"
+											}
+											className="rounded-full cursor-pointer"
+										>
+											{transaction.transactionGroup
+												? transaction.transactionGroup
+														.name
+												: "None"}
+										</Badge>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent className="w-fit">
 										<DropdownMenuGroup>
@@ -402,21 +454,64 @@ export default function TransactionTable({
 												Transaction group
 											</DropdownMenuLabel>
 											<DropdownMenuRadioGroup
-                                                className="max-h-64 overflow-y-scroll scrollbar-thin"
-												onValueChange={(value) => handleTransactionGroupChange(transaction, value) }
-												value={ transaction.transactionGroup?.id.toString() ?? undefined }
+												className="max-h-64 overflow-y-auto scrollbar-thin"
+												onValueChange={(value) =>
+													handleTransactionGroupChange(
+														transaction,
+														value,
+													)
+												}
+												value={
+													transaction.transactionGroup?.id.toString() ??
+													undefined
+												}
 											>
 												{transactionGroups?.map(
 													(transactionGroup, i) => (
 														<DropdownMenuRadioItem
 															key={i}
 															value={transactionGroup.id.toString()}
-                                                            className="py-1"
+															className="py-1"
 														>
-                                                            {transactionGroup.name}
+															{ transactionGroup.name }
 														</DropdownMenuRadioItem>
 													),
 												)}
+												<Dialog>
+													<DialogTrigger className="text-xs text-primary w-full flex gap-1 items-center py-1 px-2 hover:bg-muted cursor-pointer">
+														<Plus className="inline h-3 w-3" />
+														New group
+													</DialogTrigger>
+													<DialogContent>
+														<DialogHeader>
+															<DialogTitle className="text-lg">
+																Create a new transaction group
+															</DialogTitle>
+															<FieldGroup>
+																<Field>
+																	<Input
+																		id="name-1"
+																		name="name"
+                                                                        placeholder="E.g. Grocery shopping"
+																	/>
+																</Field>
+															</FieldGroup>
+															<DialogDescription>
+                                                                After creating the transaction group, you can select it from the dropdown menu.
+															</DialogDescription>
+                                                            <DialogFooter>
+                                                                <DialogClose asChild>
+                                                                    <Button variant="outline">
+                                                                        Cancel
+                                                                    </Button>
+                                                                </DialogClose>
+                                                                <Button type="submit">
+                                                                    Create
+                                                                </Button>
+                                                            </DialogFooter>
+														</DialogHeader>
+													</DialogContent>
+												</Dialog>
 											</DropdownMenuRadioGroup>
 										</DropdownMenuGroup>
 									</DropdownMenuContent>
@@ -431,7 +526,9 @@ export default function TransactionTable({
 											className="items-center capitalize hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
 										>
 											<Typography className="text-xs w-fit">
-                                                {formatPaymentMethod(transaction.paymentMethod)}
+												{formatPaymentMethod(
+													transaction.paymentMethod,
+												)}
 											</Typography>
 										</Button>
 									</DropdownMenuTrigger>
@@ -441,21 +538,29 @@ export default function TransactionTable({
 												Payment method
 											</DropdownMenuLabel>
 											<DropdownMenuRadioGroup
-                                                className="max-h-64 overflow-y-scroll scrollbar-thin"
-												onValueChange={(value) => handlePaymentMethodChange(transaction, value) }
-												value={transaction.paymentMethod}
+												onValueChange={(value) =>
+													handlePaymentMethodChange(
+														transaction,
+														value,
+													)
+												}
+												value={
+													transaction.paymentMethod
+												}
 											>
-												{Object.values(PaymentMethod).map(
-													(method, i) => (
-														<DropdownMenuRadioItem
-															key={i}
-															value={method}
-                                                            className="py-1 capitalize"
-														>
-                                                            {formatPaymentMethod(method)}
-														</DropdownMenuRadioItem>
-													),
-												)}
+												{Object.values(
+													PaymentMethod,
+												).map((method, i) => (
+													<DropdownMenuRadioItem
+														key={i}
+														value={method}
+														className="py-1 capitalize"
+													>
+														{formatPaymentMethod(
+															method,
+														)}
+													</DropdownMenuRadioItem>
+												))}
 											</DropdownMenuRadioGroup>
 										</DropdownMenuGroup>
 									</DropdownMenuContent>
