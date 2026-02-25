@@ -22,10 +22,11 @@ import { Slider } from "@/components/ui/slider";
 import { useGetCategories } from "@/features/categories/api/get-categories";
 import { useGetTransactionGroups } from "@/features/transaction-groups/api/get-transaction-groups";
 import { PaymentMethod } from "@/types/payment-method";
-import { Search, X } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import { useRef, useState } from "react";
 import type { TransactionsFilterRequest } from "../types/transactions-filter";
 import { DatePickerWithRange } from "./date-picker-range";
+import CreateTransactionDialog from "./create-transaction-dialog";
 
 interface TransactionFiltersProps {
 	filters: TransactionsFilterRequest;
@@ -383,7 +384,6 @@ export default function TransactionFilters({
 						</DropdownMenuGroup>
 					</DropdownMenuContent>
 				</DropdownMenu>
-
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button variant="outline">
@@ -409,6 +409,13 @@ export default function TransactionFilters({
 						</DropdownMenuRadioGroup>
 					</DropdownMenuContent>
 				</DropdownMenu>
+
+                <CreateTransactionDialog>
+                    <Button>
+                        <Plus className="h-4 w-4" />
+                        Create transaction
+                    </Button>
+                </CreateTransactionDialog>
 			</Group>
 		</Stack>
 	);

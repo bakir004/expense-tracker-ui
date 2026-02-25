@@ -228,9 +228,9 @@ export default function TransactionTable({
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{data.transactions.map((transaction, i: number) => (
+					{data.transactions.map((transaction) => (
 						<TableRow
-							key={i}
+							key={transaction.id}
 							className={cn(
 								"h-13 hover:bg-card/50",
 								selectedTransactionIds.find(
