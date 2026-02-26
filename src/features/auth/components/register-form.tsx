@@ -45,7 +45,7 @@ const formSchema = z
             .string()
             .min(8, "Password must be at least 8 characters.")
             .max(255, "Password must be less than 255 characters."),
-        initialBalance: z.number(),
+        initialBalance: z.string(),
     })
     .refine((data) => data.password === data.passwordAgain, {
         message: "Passwords must match",
@@ -60,7 +60,7 @@ export default function RegisterForm() {
             email: "",
             password: "",
             passwordAgain: "",
-            initialBalance: 0,
+            initialBalance: "0",
         },
     });
 
@@ -68,7 +68,21 @@ export default function RegisterForm() {
     const navigate = useNavigate();
 
     function onSubmit(data: z.infer<typeof formSchema>) {
-        register(data, {
+        const initialBalance = parseFloat(data.initialBalance);
+        if (isNaN(initialBalance)) {
+            form.setError("initialBalance", {
+                type: "manual",
+                message: "Initial balance must be a number.",
+            });
+            return;
+        }
+        const registerData = {
+            name: data.name,
+            email: data.email,
+            password: data.password,
+            initialBalance
+        };
+        register(registerData, {
             onSuccess: () => {
                 toast.success("Register successful!", {
                     description: "You can now log in with your new account.",
@@ -230,7 +244,7 @@ function Form({
                                 id="register-form-initial-balance"
                                 aria-invalid={fieldState.invalid}
                                 onChange={(e) =>
-                                    field.onChange(e.target.valueAsNumber)
+                                    field.onChange(e.target.value)
                                 }
                                 placeholder="0"
                                 autoComplete="off"
