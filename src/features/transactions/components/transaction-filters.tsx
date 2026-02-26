@@ -27,6 +27,7 @@ import { useRef, useState } from "react";
 import type { TransactionsFilterRequest } from "../types/transactions-filter";
 import { DatePickerWithRange } from "./date-picker-range";
 import CreateTransactionDialog from "./create-transaction-dialog";
+import type { DateRange } from "react-day-picker";
 
 interface TransactionFiltersProps {
 	filters: TransactionsFilterRequest;
@@ -85,6 +86,25 @@ export default function TransactionFilters({
 			}));
 		}, DEBOUNCE_DELAY);
 	};
+
+    const setDate = (dateRange: DateRange | undefined) => {
+        const formatToLocalSqlDate = (date: Date | undefined) => {
+            if (!date) return undefined;
+            const adjustedDate = new Date(date);
+            adjustedDate.setHours(adjustedDate.getHours() + 12);
+            return adjustedDate.toISOString().split("T")[0];
+        };
+
+        const dateFrom = formatToLocalSqlDate(dateRange?.from);
+        const dateTo = formatToLocalSqlDate(dateRange?.to);
+
+        setFilters((prev) => ({
+            ...prev,
+            page: 1,
+            dateFrom,
+            dateTo,
+        }));
+    };
 
 	const createDateFromFormattedString = (dateString: string | undefined) => {
 		if (!dateString) return undefined;
@@ -173,6 +193,9 @@ export default function TransactionFilters({
 			page: 1,
 			pageSize: filters.pageSize,
 		}));
+		if (timeoutRef.current)
+			clearTimeout(timeoutRef.current);
+
 		setSubjectSearch("");
 		setSliderValues([SLIDER_MIN_VALUE + 1, SLIDER_MAX_VALUE - 1]);
 		setSelectedCategoryIds([]);
@@ -226,7 +249,7 @@ export default function TransactionFilters({
 				</DropdownMenu>
 				<Typography className="text-xs">Date range:</Typography>
 				<DatePickerWithRange
-					setFilters={setFilters}
+                    setDate={setDate}
 					date={{
 						from: createDateFromFormattedString(filters.dateFrom),
 						to: createDateFromFormattedString(filters.dateTo),

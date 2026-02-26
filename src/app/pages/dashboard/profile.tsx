@@ -1,3 +1,3 @@
 export default function Profile() {
-    return <div>niggas</div>;
+    return <div>profiel</div>;
 }

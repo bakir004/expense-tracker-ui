@@ -8,6 +8,7 @@ import Register from "./pages/register";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { PublicOnlyRoute } from "@/components/auth/public-only-route";
 import Landing from "./pages/landing";
+import Charts from "./pages/dashboard/charts";
 
 const router = createBrowserRouter([
     {
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
                             {
                                 path: "profile",
                                 element: <Profile />,
+                            },
+                            {
+                                path: "charts",
+                                element: <Charts />,
                             },
                         ],
                     },

@@ -9,31 +9,16 @@ import {
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { type DateRange } from "react-day-picker";
-import type { TransactionsFilterRequest } from "../types/transactions-filter";
 
 interface DateRangePickerProps {
 	date: DateRange;
-	setFilters: (
-		filters: (prev: TransactionsFilterRequest) => TransactionsFilterRequest,
-	) => void;
+    setDate: (date: DateRange | undefined) => void;
 }
 
 export function DatePickerWithRange({
 	date,
-	setFilters,
+	setDate,
 }: DateRangePickerProps) {
-	const setFilterDate = (range: DateRange | undefined) => {
-		const dateFrom = range?.from
-			? format(range.from, "yyyy-MM-dd")
-			: undefined;
-		const dateTo = range?.to ? format(range.to, "yyyy-MM-dd") : undefined;
-		setFilters((prev) => ({
-			...prev,
-			dateFrom,
-			dateTo,
-		}));
-	};
-
 	return (
 		<Field className="w-60">
 			<Popover>
@@ -63,7 +48,7 @@ export function DatePickerWithRange({
 						mode="range"
 						defaultMonth={date?.from}
 						selected={date}
-						onSelect={setFilterDate}
+						onSelect={setDate}
 						numberOfMonths={2}
 					/>
 				</PopoverContent>

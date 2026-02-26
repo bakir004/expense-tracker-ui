@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, User } from "lucide-react";
+import { ChartBar, LayoutDashboard, LogOut, User } from "lucide-react";
 import { Group } from "../layout/group";
 import { Stack } from "../layout/stack";
 import { Button } from "../ui/button";
@@ -32,6 +32,11 @@ export default function Sidebar() {
                     label: "Dashboard",
                     icon: <LayoutDashboard />,
                     to: "/dashboard",
+                },
+                {
+                    label: "Charts",
+                    icon: <ChartBar />,
+                    to: "/dashboard/charts",
                 },
                 {
                     label: "Profile",

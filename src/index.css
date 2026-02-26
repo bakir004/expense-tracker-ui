@@ -43,7 +43,7 @@ h3 {
 
 :root {
     /* Base colors */
-    --background: #ebe5d5;
+    --background: #ffffff;
     --foreground: oklch(0.141 0.005 285.823);
     --primary: #00b344;
     --primary-foreground: oklch(0.98 0.02 166);

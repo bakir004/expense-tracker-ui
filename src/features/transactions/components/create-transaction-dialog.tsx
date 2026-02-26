@@ -94,6 +94,7 @@ export default function CreateTransactionDialog({
 		};
         form.reset();
 		createTransaction(transactionData);
+        setOpen(false);
 	}
 
     useEffect(() => {
@@ -161,7 +162,7 @@ function Form({
 								autoComplete="off"
 							/>
 							{fieldState.invalid && (
-								<FieldError errors={[fieldState.error]} />
+								<FieldError className="-mt-1.5" errors={[fieldState.error]} />
 							)}
 						</Field>
 					)}
@@ -181,9 +182,6 @@ function Form({
 								placeholder="E.g. Received salary for June, Bought groceries at Walmart, etc."
 								autoComplete="off"
 							/>
-							{fieldState.invalid && (
-								<FieldError errors={[fieldState.error]} />
-							)}
 						</Field>
 					)}
 				/>
@@ -203,11 +201,11 @@ function Form({
                                     placeholder="E.g. 1000"
                                     autoComplete="off"
                                 />
-                                <FieldDescription>
-                                    Must be non-negative.
+                                <FieldDescription className="!-mt-1.5">
+                                    Must be positive
                                 </FieldDescription>
                                 {fieldState.invalid && (
-                                    <FieldError errors={[fieldState.error]} />
+                                    <FieldError className="-mt-2" errors={[fieldState.error]} />
                                 )}
                             </Field>
                         )}
@@ -242,9 +240,6 @@ function Form({
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
-                                {fieldState.invalid && (
-                                    <FieldError errors={[fieldState.error]} />
-                                )}
                             </Field>
                         )}
                     />
@@ -298,9 +293,6 @@ function Form({
                                         }
                                     </SelectContent>
                                 </Select>
-                                {fieldState.invalid && (
-                                    <FieldError errors={[fieldState.error]} />
-                                )}
                             </Field>
                         )}
                     />
@@ -340,9 +332,6 @@ function Form({
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                {fieldState.invalid && (
-                                    <FieldError errors={[fieldState.error]} />
-                                )}
                             </Field>
                         )}
                     />
@@ -380,9 +369,6 @@ function Form({
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                {fieldState.invalid && (
-                                    <FieldError errors={[fieldState.error]} />
-                                )}
                             </Field>
                         )}
                     />

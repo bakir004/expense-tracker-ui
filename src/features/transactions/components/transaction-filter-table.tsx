@@ -19,10 +19,33 @@ import { useUpdateTransaction } from "../api/update-transaction";
 const DEFAULT_PAGE_SIZE = 10;
 
 export default function TransactionFilterTable() {
-	const [filters, setFilters] = useState<TransactionsFilterRequest>({
-		page: 1,
-		pageSize: DEFAULT_PAGE_SIZE,
-	});
+    const getInitialFilters = (): TransactionsFilterRequest => {
+        const params = new URLSearchParams(window.location.search);
+
+        return {
+            transactionType: params.get("transactionType") || undefined,
+            dateFrom: params.get("dateFrom") || undefined,
+            dateTo: params.get("dateTo") || undefined,
+            subjectContains: params.get("subjectContains") || undefined,
+            notesContains: params.get("notesContains") || undefined,
+            sortBy: params.get("sortBy") || undefined,
+            sortDirection: params.get("sortDirection") || undefined,
+
+            minAmount: params.get("minAmount") ? Number(params.get("minAmount")) : undefined,
+            maxAmount: params.get("maxAmount") ? Number(params.get("maxAmount")) : undefined,
+            page: params.get("page") ? Number(params.get("page")) : 1,
+            pageSize: params.get("pageSize") ? Number(params.get("pageSize")) : DEFAULT_PAGE_SIZE,
+
+            uncategorized: params.get("uncategorized") === "true" ? true : undefined,
+            ungrouped: params.get("ungrouped") === "true" ? true : undefined,
+
+            categoryIds: params.get("categoryIds")?.split(",").map(Number) || undefined,
+            transactionGroupIds: params.get("transactionGroupIds")?.split(",").map(Number) || undefined,
+            paymentMethods: params.get("paymentMethods")?.split(",") || undefined,
+        }
+    }
+
+	const [filters, setFilters] = useState<TransactionsFilterRequest>(getInitialFilters);
 	const [prevCount, setPrevCount] = useState(DEFAULT_PAGE_SIZE);
 	const [sortColumn, setSortColumn] = useState<string>("date");
 	const { data, isLoading } = useGetTransactions(filters);
