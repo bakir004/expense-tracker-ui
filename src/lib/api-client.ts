@@ -6,6 +6,7 @@ interface ApiOptions extends RequestInit {
     body?: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     params?: Record<string, any>;
+    responseType?: "json" | "blob";
 }
 
 const getCookie = (name: string): string | undefined => {
@@ -17,12 +18,13 @@ const getCookie = (name: string): string | undefined => {
 
 export async function apiClient<T>(
     endpoint: string,
-    { body, method, params, ...customConfig }: ApiOptions = {},
+    { body, method, params, responseType, ...customConfig }: ApiOptions = {},
 ): Promise<T> {
     const token = getCookie("jwt");
 
     const headers: HeadersInit = {
         "Content-Type": "application/json",
+        ...(body ? { "Content-Type": "application/json" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
 
@@ -67,5 +69,8 @@ export async function apiClient<T>(
 
     if (response.status === 204) return {} as T;
 
+    if (responseType === 'blob') {
+        return (await response.blob()) as unknown as T;
+    }
     return response.json();
 }

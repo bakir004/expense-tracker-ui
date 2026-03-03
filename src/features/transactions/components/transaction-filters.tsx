@@ -22,12 +22,13 @@ import { Slider } from "@/components/ui/slider";
 import { useGetCategories } from "@/features/categories/api/get-categories";
 import { useGetTransactionGroups } from "@/features/transaction-groups/api/get-transaction-groups";
 import { PaymentMethod } from "@/types/payment-method";
-import { Plus, Search, X } from "lucide-react";
+import { Download, Plus, Search, X } from "lucide-react";
 import { useRef, useState } from "react";
 import type { TransactionsFilterRequest } from "../types/transactions-filter";
 import { DatePickerWithRange } from "./date-picker-range";
 import CreateTransactionDialog from "./create-transaction-dialog";
 import type { DateRange } from "react-day-picker";
+import { useExportTransactions } from "../api/export-transaction-csv";
 
 interface TransactionFiltersProps {
 	filters: TransactionsFilterRequest;
@@ -59,6 +60,7 @@ export default function TransactionFilters({
 	>([]);
 	const { data: categories } = useGetCategories();
 	const { data: transactionGroups } = useGetTransactionGroups();
+    const { mutate: exportTransactionsCSV } = useExportTransactions();
 
 	const transactionTypeFilter = (type: string) => {
 		if (type === "BOTH")
@@ -202,6 +204,10 @@ export default function TransactionFilters({
         setSelectedTransactionGroupIds([]);
         setSelectedPaymentMethods([]);
 	};
+
+    const exportToCSV = () => {
+        exportTransactionsCSV(filters);
+    }
 
 	return (
 		<Stack padding={0}>
@@ -439,6 +445,10 @@ export default function TransactionFilters({
                         Create transaction
                     </Button>
                 </CreateTransactionDialog>
+                <Button onClick={exportToCSV}>
+                    <Download className="h-4 w-4" />
+                    Export to CSV
+                </Button>
 			</Group>
 		</Stack>
 	);
