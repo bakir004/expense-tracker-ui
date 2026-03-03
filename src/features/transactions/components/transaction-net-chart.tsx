@@ -3,7 +3,6 @@ import { TrendingDown, TrendingUp } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { format, subDays } from "date-fns";
 import { type DateRange } from "react-day-picker";
-import { useNavigate } from "react-router-dom";
 
 import {
 	Card,
@@ -37,8 +36,7 @@ interface ChartDataPoint {
 	transactions: TransactionNetChartData["transactions"];
 }
 
-export function TransactionNetChart() {
-	const navigate = useNavigate();
+export function TransactionNetChart({ setDate }: { setDate: (date: string) => void }) {
 	const [dateRange, setDateRange] = useState<DateRange | undefined>({
 		from: subDays(new Date(), 30),
 		to: new Date(),
@@ -63,11 +61,7 @@ export function TransactionNetChart() {
 
 	const handleBarClick = (data: ChartDataPoint) => {
 		if (data && data.date) {
-			const params = new URLSearchParams({
-				dateFrom: data.date,
-				dateTo: data.date,
-			});
-			navigate(`/dashboard?${params.toString()}`);
+            setDate(data.date);
 		}
 	};
     const totals = chartData?.reduce(

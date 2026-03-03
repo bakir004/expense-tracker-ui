@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { Pie, PieChart, Cell, Legend } from "recharts";
 
 import {
@@ -34,8 +33,7 @@ const COLORS = [
     "#f43f5e", // Rose 500
 ];
 
-export function TransactionsByCategoryChart() {
-    const navigate = useNavigate();
+export function TransactionsByCategoryChart({ setCategory }: { setCategory: (categoryId: number) => void }) {
     const { data, isLoading: isChartLoading } = useGetTransactionsByCategoryChartData();
     const { data: categories, isLoading: isCatsLoading } = useGetCategories();
 
@@ -53,7 +51,7 @@ export function TransactionsByCategoryChart() {
                 categoryName: item.categoryId 
                     ? categoryMap.get(item.categoryId) || "Unknown Category" 
                     : "Uncategorized",
-                amount: item.netExpenses,
+                amount: Math.abs(item.netExpenses),
                 fill: COLORS[index % COLORS.length],
             }));
     }, [data, categories]);
@@ -63,13 +61,7 @@ export function TransactionsByCategoryChart() {
     } satisfies ChartConfig;
 
     const handlePieClick = (id: number) => {
-        const params = new URLSearchParams();
-        if (id) {
-            params.set("categoryIds", id.toString());
-        } else {
-            params.set("uncategorized", "true");
-        }
-        navigate(`/dashboard?${params.toString()}`);
+        setCategory(id);
     };
 
     if (isChartLoading || isCatsLoading)

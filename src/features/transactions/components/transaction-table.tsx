@@ -42,15 +42,16 @@ import EditAmountDialog from "./edit-amount-dialog";
 interface TransactionTableProps {
 	data: TransactionsWithPagingMetadata;
 	sort: (field: string) => void;
-	sortColumn?: string;
-	selectedTransactionIds: number[];
-	setSelectedTransactionIds: React.Dispatch<React.SetStateAction<number[]>>;
-	update: UseMutateFunction<
+	sortColumn: string;
+	selectedTransactionIds?: number[];
+	setSelectedTransactionIds?: React.Dispatch<React.SetStateAction<number[]>>;
+	update?: UseMutateFunction<
 		TransactionPopulated,
 		ErrorResponse,
 		UpdateTransactionRequest,
 		unknown
 	>;
+    readonly?: boolean;
 }
 
 const columns = [
@@ -69,6 +70,7 @@ export default function TransactionTable({
 	selectedTransactionIds = [],
 	setSelectedTransactionIds = () => {},
 	update,
+    readonly = false,
 }: TransactionTableProps) {
 	const sgn = (n: number) => (n < 0 ? "-" : "+");
 	const formatAmount = (amount: number) => `${sgn(amount)}$${Math.abs(amount)}`;
@@ -122,6 +124,7 @@ export default function TransactionTable({
 	const updateTransaction = (transaction: TransactionPopulated) => {
 		const updatedTransactionRequest =
 			fromTransactionPopulatedToRequest(transaction);
+        if(!update) return;
 		update(updatedTransactionRequest);
 	};
 
@@ -203,6 +206,7 @@ export default function TransactionTable({
 					<TableRow>
 						<TableHead className="w-8">
 							<Checkbox
+                                disabled={readonly}
 								checked={allSelectedForActivePage}
 								onCheckedChange={
 									toggleSelectingAllTransactionsOnActivePage
@@ -242,6 +246,7 @@ export default function TransactionTable({
 						>
 							<TableCell>
 								<Checkbox
+                                    disabled={readonly}
 									checked={
 										!!selectedTransactionIds.find(
 											(id) => id === transaction.id,
@@ -288,7 +293,7 @@ export default function TransactionTable({
 									<Typography
 										className="text-xs cursor-pointer"
 										onClick={() =>
-											startEditingSubjectForTransaction(
+                                            readonly && startEditingSubjectForTransaction(
 												transaction.id,
 											)
 										}
