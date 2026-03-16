@@ -22,9 +22,10 @@ interface CreateTransactionGroupDialogProps {
     children?: React.ReactNode;
     transaction: TransactionPopulated;
     updateTransaction: (transaction: TransactionPopulated) => void;
+    readonly?: boolean;
 }
 
-export default function EditAmountDialog({ children, transaction, updateTransaction }: CreateTransactionGroupDialogProps) {
+export default function EditAmountDialog({ children, transaction, updateTransaction, readonly }: CreateTransactionGroupDialogProps) {
     const [open, setOpen] = useState(false);
     const [amount, setAmount] = useState<string>(transaction.amount.toString());
     const [transactionType, setTransactionType] = useState(transaction.transactionType);
@@ -45,7 +46,7 @@ export default function EditAmountDialog({ children, transaction, updateTransact
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger>
+			<DialogTrigger disabled={readonly}>
                 {children}
 			</DialogTrigger>
 			<DialogContent>

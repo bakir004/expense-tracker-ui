@@ -51,7 +51,7 @@ interface TransactionTableProps {
 		UpdateTransactionRequest,
 		unknown
 	>;
-    readonly?: boolean;
+	readonly?: boolean;
 }
 
 const columns = [
@@ -68,14 +68,14 @@ export default function TransactionTable({
 	sort,
 	sortColumn,
 	selectedTransactionIds = [],
-	setSelectedTransactionIds = () => {},
+	setSelectedTransactionIds = () => { },
 	update,
-    readonly = false,
+	readonly = false,
 }: TransactionTableProps) {
 	const sgn = (n: number) => (n < 0 ? "-" : "+");
 	const formatAmount = (amount: number) => `${sgn(amount)}$${Math.abs(amount)}`;
 	const formatPaymentMethod = (method: string) => method.replace("_", " ").toLowerCase();
-    const formatDate = (date: Date) => new Intl.DateTimeFormat("en-GB").format(date);
+	const formatDate = (date: Date) => new Intl.DateTimeFormat("en-GB").format(date);
 	const { data: categories } = useGetCategories();
 	const { data: transactionGroups } = useGetTransactionGroups();
 
@@ -124,7 +124,7 @@ export default function TransactionTable({
 	const updateTransaction = (transaction: TransactionPopulated) => {
 		const updatedTransactionRequest =
 			fromTransactionPopulatedToRequest(transaction);
-        if(!update) return;
+		if (!update) return;
 		update(updatedTransactionRequest);
 	};
 
@@ -142,8 +142,8 @@ export default function TransactionTable({
 		newNotes: string,
 	) => {
 		setEditingNotesTransactionId(null);
-        if(!transaction.notes && newNotes.trim() === "") return;
-		if(newNotes.trim() === transaction.notes?.trim()) return;
+		if (!transaction.notes && newNotes.trim() === "") return;
+		if (newNotes.trim() === transaction.notes?.trim()) return;
 		const updatedTransaction = { ...transaction, notes: newNotes.trim() };
 		updateTransaction(updatedTransaction);
 	};
@@ -206,7 +206,7 @@ export default function TransactionTable({
 					<TableRow>
 						<TableHead className="w-8">
 							<Checkbox
-                                disabled={readonly}
+								disabled={readonly}
 								checked={allSelectedForActivePage}
 								onCheckedChange={
 									toggleSelectingAllTransactionsOnActivePage
@@ -246,7 +246,7 @@ export default function TransactionTable({
 						>
 							<TableCell>
 								<Checkbox
-                                    disabled={readonly}
+									disabled={readonly}
 									checked={
 										!!selectedTransactionIds.find(
 											(id) => id === transaction.id,
@@ -259,7 +259,7 @@ export default function TransactionTable({
 							</TableCell>
 							<TableCell className="font-medium pl-4 group">
 								{editingSubjectTransactionId ===
-								transaction.id ? (
+									transaction.id ? (
 									<input
 										autoFocus
 										defaultValue={transaction.subject}
@@ -293,7 +293,8 @@ export default function TransactionTable({
 									<Typography
 										className="text-xs cursor-pointer"
 										onClick={() =>
-                                            readonly && startEditingSubjectForTransaction(
+											!readonly &&
+											startEditingSubjectForTransaction(
 												transaction.id,
 											)
 										}
@@ -302,7 +303,7 @@ export default function TransactionTable({
 									</Typography>
 								)}
 								{editingNotesTransactionId ===
-								transaction.id ? (
+									transaction.id ? (
 									<input
 										autoFocus
 										defaultValue={transaction.notes ?? ""}
@@ -341,7 +342,7 @@ export default function TransactionTable({
 												transaction.id,
 											)
 										}
-										className="cursor-pointer opacity-0 -mt-4 group-hover:-mt-0 transition-[margin,opacity] hover:text-foreground group-hover:opacity-100 text-muted-foreground font-light text-xs"
+										className="cursor-pointer opacity-0 -mt-4 group-hover:mt-0 transition-[margin,opacity] hover:text-foreground group-hover:opacity-100 text-muted-foreground font-light text-xs"
 									>
 										Add a note{" "}
 										<Plus className="inline h-3 w-3" />
@@ -362,12 +363,13 @@ export default function TransactionTable({
 									<Button
 										variant="ghost"
 										id="date-picker-simple"
-										className="items-center hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
+										disabled={readonly}
+										className="items-center opacity-100! hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
 									>
 										<Typography className="text-xs w-fit">
-                                            {formatDate(transaction.date)}
+											{formatDate(transaction.date)}
 										</Typography>
-										<Pencil className="inline max-h-3 max-w-3 -mt-0.5 opacity-0 group-hover:opacity-100 transition" />
+										{!readonly && <Pencil className="inline max-h-3 max-w-3 -mt-0.5 opacity-0 group-hover:opacity-100 transition" />}
 									</Button>
 								</DatePickerSimple>
 							</TableCell>
@@ -376,7 +378,8 @@ export default function TransactionTable({
 									<DropdownMenuTrigger asChild>
 										<Button
 											variant="ghost"
-											className="items-center hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
+											disabled={readonly}
+											className="items-center opacity-100! hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
 										>
 											<Typography className="text-xs w-fit">
 												{transaction.category
@@ -392,23 +395,24 @@ export default function TransactionTable({
 											</DropdownMenuLabel>
 											<DropdownMenuRadioGroup
 												className="max-h-64 overflow-y-scroll scrollbar-thin"
-												onValueChange={(value) =>
+												onValueChange={(value) => {
+													if (readonly) return;
 													handleCategoryChange(
 														transaction,
 														value,
-													)
-												}
+													);
+												}}
 												value={
 													transaction.category?.id.toString() ??
 													undefined
 												}
 											>
-                                                <DropdownMenuRadioItem
-                                                    value=""
-                                                    className="py-1 italic"
-                                                >
-                                                    None
-                                                </DropdownMenuRadioItem>
+												<DropdownMenuRadioItem
+													value=""
+													className="py-1 italic"
+												>
+													None
+												</DropdownMenuRadioItem>
 												{categories?.map(
 													(category, i) => (
 														<DropdownMenuRadioItem
@@ -427,7 +431,7 @@ export default function TransactionTable({
 							</TableCell>
 							<TableCell>
 								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
+									<DropdownMenuTrigger disabled={readonly} asChild>
 										<Badge
 											variant={
 												transaction.transactionGroup
@@ -438,7 +442,7 @@ export default function TransactionTable({
 										>
 											{transaction.transactionGroup
 												? transaction.transactionGroup
-														.name
+													.name
 												: "None"}
 										</Badge>
 									</DropdownMenuTrigger>
@@ -449,27 +453,28 @@ export default function TransactionTable({
 											</DropdownMenuLabel>
 											<DropdownMenuRadioGroup
 												className="max-h-64 overflow-y-auto scrollbar-thin"
-												onValueChange={(value) =>
+												onValueChange={(value) => {
+													if (readonly) return;
 													handleTransactionGroupChange(
 														transaction,
 														value,
-													)
-												}
+													);
+												}}
 												value={
 													transaction.transactionGroup?.id.toString() ??
 													undefined
 												}
 											>
-                                                <CreateTransactionGroupDialog>
-                                                    <Plus className="inline h-4 w-4" />
-                                                    New group
-                                                </CreateTransactionGroupDialog>
-                                                <DropdownMenuRadioItem
-                                                    value=""
-                                                    className="py-1 italic"
-                                                >
-                                                    None
-                                                </DropdownMenuRadioItem>
+												<CreateTransactionGroupDialog>
+													<Plus className="inline h-4 w-4" />
+													New group
+												</CreateTransactionGroupDialog>
+												<DropdownMenuRadioItem
+													value=""
+													className="py-1 italic"
+												>
+													None
+												</DropdownMenuRadioItem>
 												{transactionGroups?.map(
 													(transactionGroup, i) => (
 														<DropdownMenuRadioItem
@@ -477,7 +482,7 @@ export default function TransactionTable({
 															value={transactionGroup.id.toString()}
 															className="py-1"
 														>
-															{ transactionGroup.name }
+															{transactionGroup.name}
 														</DropdownMenuRadioItem>
 													),
 												)}
@@ -491,7 +496,8 @@ export default function TransactionTable({
 									<DropdownMenuTrigger asChild>
 										<Button
 											variant="ghost"
-											className="items-center capitalize hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
+											disabled={readonly}
+											className="items-center capitalize opacity-100! hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition"
 										>
 											<Typography className="text-xs w-fit">
 												{formatPaymentMethod(
@@ -506,12 +512,13 @@ export default function TransactionTable({
 												Payment method
 											</DropdownMenuLabel>
 											<DropdownMenuRadioGroup
-												onValueChange={(value) =>
+												onValueChange={(value) => {
+													if (readonly) return;
 													handlePaymentMethodChange(
 														transaction,
 														value,
-													)
-												}
+													);
+												}}
 												value={
 													transaction.paymentMethod
 												}
@@ -542,16 +549,17 @@ export default function TransactionTable({
 										: "text-primary",
 								)}
 							>
-                                <EditAmountDialog
-                                    transaction={transaction}
-                                    updateTransaction={updateTransaction}
-                                >
-                                    <div className="items-center capitalize hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition">
-                                        <Typography className={cn("text-xs", transaction.signedAmount < 0 ? "text-destructive" : "text-primary")}>
-                                            {formatAmount(transaction.signedAmount)}
-                                        </Typography>
-                                    </div>
-                                </EditAmountDialog>
+								<EditAmountDialog
+									transaction={transaction}
+									updateTransaction={updateTransaction}
+									readonly={readonly}
+								>
+									<div className="items-center capitalize hover:bg-muted h-fit w-fit max-w-fit px-1 py-0.25 rounded cursor-pointer transition">
+										<Typography className={cn("text-xs", transaction.signedAmount < 0 ? "text-destructive" : "text-primary")}>
+											{formatAmount(transaction.signedAmount)}
+										</Typography>
+									</div>
+								</EditAmountDialog>
 							</TableCell>
 						</TableRow>
 					))}

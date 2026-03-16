@@ -15,12 +15,12 @@ export default function Charts() {
         pageSize: 10,
     });
     const { data } = useGetTransactions(filters);
-	const [prevCount, setPrevCount] = useState(10);
-	const [sortColumn, setSortColumn] = useState<string>("date");
+    const [prevCount, setPrevCount] = useState(10);
+    const [sortColumn, setSortColumn] = useState<string>("date");
 
-	if (data?.transactions?.length && data.transactions.length !== prevCount) {
-		setPrevCount(data.transactions.length);
-	}
+    if (data?.transactions?.length && data.transactions.length !== prevCount) {
+        setPrevCount(data.transactions.length);
+    }
 
     const setDate = (date: string) => {
         const newFilters: TransactionsFilterRequest = {
@@ -41,21 +41,21 @@ export default function Charts() {
         setFilters(newFilters);
     }
 
-	const sort = (field: string) => {
-		setSortColumn(field);
-		setFilters((prev) => {
-			const isSameField = prev.sortBy === field;
-			const newSortDirection =
-				isSameField && prev.sortDirection === "asc" ? "desc" : "asc";
-			return { ...prev, sortBy: field, sortDirection: newSortDirection };
-		});
-	};
+    const sort = (field: string) => {
+        setSortColumn(field);
+        setFilters((prev) => {
+            const isSameField = prev.sortBy === field;
+            const newSortDirection =
+                isSameField && prev.sortDirection === "asc" ? "desc" : "asc";
+            return { ...prev, sortBy: field, sortDirection: newSortDirection };
+        });
+    };
 
     return (
         <>
             <Typography className="mt-4" variant="h3">Dashboard Charts</Typography>
             <Typography>
-                This is the charts page. Here you can visualize your financial data with various charts and graphs.
+                Visualize your financial data with various charts and graphs.
             </Typography>
             <Stack padding={0}>
                 <Group padding={0}>
