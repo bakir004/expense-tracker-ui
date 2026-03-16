@@ -8,6 +8,14 @@ import { useGetTransactions } from "@/features/transactions/api/get-transactions
 import { useState } from "react";
 import type { TransactionsFilterRequest } from "@/features/transactions/types/transactions-filter";
 import TransactionTableSkeleton from "@/features/transactions/components/transaction-table-skeleton";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function Charts() {
     const [filters, setFilters] = useState<TransactionsFilterRequest>({
@@ -51,6 +59,17 @@ export default function Charts() {
         });
     };
 
+    const prev = () =>
+        setFilters((prev) => ({
+            ...prev,
+            page: Math.max(1, (prev.page || 1) - 1),
+        }));
+    const next = () =>
+        setFilters((prev) => ({
+            ...prev,
+            page: Math.min((prev.page || 1) + 1, data?.totalPages || 1),
+        }));
+
     return (
         <>
             <Typography className="mt-4" variant="h3">Dashboard Charts</Typography>
@@ -62,8 +81,67 @@ export default function Charts() {
                     <TransactionNetChart setDate={setDate} />
                     <TransactionsByCategoryChart setCategory={setCategory} />
                 </Group>
-                {data ? <TransactionTable readonly sortColumn={sortColumn} sort={sort} data={data} /> :
-                    <TransactionTableSkeleton count={prevCount} />}
+                {data ? (
+                    <>
+                        <TransactionTable
+                            readonly
+                            sortColumn={sortColumn}
+                            sort={sort}
+                            data={data}
+                        />
+                        <Pagination>
+                            <PaginationContent>
+                                <PaginationItem className="cursor-pointer">
+                                    <PaginationPrevious onClick={prev} />
+                                </PaginationItem>
+
+                                {filters.page && filters.page < 2 && (
+                                    <PaginationItem>
+                                        <PaginationLink>&nbsp;</PaginationLink>
+                                    </PaginationItem>
+                                )}
+
+                                {filters.page && filters.page >= 2 && (
+                                    <PaginationItem className="cursor-pointer">
+                                        <PaginationLink onClick={prev}>
+                                            {filters.page - 1}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                )}
+
+                                <PaginationItem className="cursor-pointer">
+                                    <PaginationLink
+                                        isActive={
+                                            filters.page === data?.currentPage
+                                        }
+                                    >
+                                        {filters.page}
+                                    </PaginationLink>
+                                </PaginationItem>
+
+                                {filters.page <= (data?.totalPages ?? 0) - 1 && (
+                                    <PaginationItem className="cursor-pointer">
+                                        <PaginationLink onClick={next}>
+                                            {filters.page + 1}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                )}
+
+                                {filters.page > (data?.totalPages ?? 0) - 1 && (
+                                    <PaginationItem>
+                                        <PaginationLink>&nbsp;</PaginationLink>
+                                    </PaginationItem>
+                                )}
+
+                                <PaginationItem className="cursor-pointer">
+                                    <PaginationNext onClick={next} />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    </>
+                ) : (
+                    <TransactionTableSkeleton count={prevCount} />
+                )}
             </Stack>
         </>
     );
