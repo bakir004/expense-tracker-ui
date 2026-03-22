@@ -1,0 +1,67 @@
+# Full stack: PostgreSQL + Expense Tracker API + UI (nginx).
+# Run from this directory: docker compose up --build
+# Requires sibling folder: ../expense-tracker-api (same layout as kodecta-academy).
+#
+# App: http://localhost:8080  (UI proxies /api → API container)
+# API direct: http://localhost:5000  (optional; browser CORS may block the SPA origin)
+
+name: expense-tracker
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: expense-tracker-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: expense-tracker-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../expense-tracker-api
+      dockerfile: docker/Dockerfile
+    container_name: expense-tracker-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5000
+      # Override localhost in appsettings when API runs inside Docker
+      ConnectionStrings__DefaultConnection: >-
+        Host=postgres;Database=expense-tracker-db;Username=postgres;Password=postgres;Port=5432;
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - api-logs:/app/logs
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Browser calls same origin; nginx forwards /api to the api service
+        VITE_API_URL: /api
+        VITE_API_VERSION: v1
+    container_name: expense-tracker-ui
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  api-logs:
