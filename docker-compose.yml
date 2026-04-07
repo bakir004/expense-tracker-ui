@@ -1,6 +1,6 @@
 # Full stack: PostgreSQL + Expense Tracker API + UI (nginx).
-# Run from this directory: docker compose up --build
-# Requires sibling folder: ../expense-tracker-api (same layout as kodecta-academy).
+# Run from this directory: docker compose up
+# Images pulled from Docker Hub: bakeroni1/expense-api:latest, bakeroni1/expense-ui:latest
 #
 # App: http://localhost:8080  (UI proxies /api → API container)
 # API direct: http://localhost:5000  (optional; browser CORS may block the SPA origin)
@@ -27,9 +27,7 @@ services:
       retries: 5
 
   api:
-    build:
-      context: ../expense-tracker-api
-      dockerfile: docker/Dockerfile
+    image: bakeroni1/expense-api:latest
     container_name: expense-tracker-api
     restart: unless-stopped
     ports:
@@ -47,13 +45,7 @@ services:
       - api-logs:/app/logs
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        # Browser calls same origin; nginx forwards /api to the api service
-        VITE_API_URL: /api
-        VITE_API_VERSION: v1
+    image: bakeroni1/expense-ui:latest
     container_name: expense-tracker-ui
     restart: unless-stopped
     ports:
