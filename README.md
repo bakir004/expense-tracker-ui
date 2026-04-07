@@ -1,5 +1,7 @@
 # Expense Tracker UI
 
+> Part of [bakir004/expense-tracker](https://github.com/bakir004/expense-tracker) — a full-stack expense tracking suite.
+
 Frontend for an expense-tracking app: dashboard, transactions, charts, categories, transaction groups, **profile / account settings**, and auth against a separate REST API.
 
 **Stack:** React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui (Radix / Base UI), TanStack Query, React Router, React Hook Form + Zod, Recharts.
@@ -12,17 +14,20 @@ Frontend for an expense-tracking app: dashboard, transactions, charts, categorie
 
 ### Option A — Full stack with Docker
 
-Runs PostgreSQL, the API, and this UI (nginx serves the SPA and proxies `/api` to the API so the browser stays on one origin).
+Runs PostgreSQL, the API, and this UI (nginx serves the SPA and proxies `/api` to the API so the browser stays on one origin). Images are pulled from Docker Hub — no local build required.
 
-1. Place this repo next to the API repo so `../expense-tracker-api` exists (same parent folder as in `kodecta-academy`).
-2. From **this directory** (`expense-tracker-ui`):
+1. From **this directory** (`expense-tracker-ui`):
 
    ```bash
-   docker compose up --build
+   docker compose up
    ```
 
-3. Open **`http://localhost:8080`** for the app.
-4. Optional: API directly at **`http://localhost:5000`**, Postgres on **`localhost:5432`** (see `docker-compose.yml` for credentials).
+2. Open **`http://localhost:8080`** for the app.
+3. Optional: API directly at **`http://localhost:5000`**, Postgres on **`localhost:5432`** (see `docker-compose.yml` for credentials).
+
+Images used:
+- UI: `bakeroni1/expense-ui:latest`
+- API: `bakeroni1/expense-api:latest`
 
 Seeded test users (if the API seeds on first run) are documented in the API; common example logins use email + `Password123!` where the API README lists them.
 
